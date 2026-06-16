@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maaser — Jose Laniado</title>
+<style>
+:root{--bg:#0E0F13;--surface:#161820;--border:#252730;--accent:#F0C040;--green:#3DD68C;--red:#FF5757;--muted:#6B7280;--text:#F0F1F4;--gold:#C9A84C}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'DM Mono',monospace,sans-serif;font-size:13px;max-width:720px;margin:0 auto;padding:16px 14px 40px}
+h1{font-size:22px;font-weight:800;margin-bottom:3px;letter-spacing:-0.5px}
+.sub{color:var(--muted);font-size:11px;margin-bottom:16px}
+.hero{background:linear-gradient(135deg,#1C1A10,#2A2410);border:1px solid var(--gold);border-radius:12px;padding:18px;margin-bottom:14px}
+.hero-label{font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.hero-val{font-size:32px;font-weight:800;color:var(--accent);margin-bottom:2px}
+.hero-sub{font-size:11px;color:var(--muted)}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px}
+.card .lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.card .val{font-size:18px;font-weight:700}
+.val-green{color:var(--green)}
+.val-red{color:var(--red)}
+.val-yellow{color:var(--accent)}
+.section-title{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;margin-top:16px}
+.compromisos{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:14px}
+.comp-header{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#12131A;border-bottom:1px solid var(--border)}
+.comp-title{font-size:12px;font-weight:600}
+.comp-total{font-size:12px;color:var(--accent);font-weight:700}
+.comp-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border)}
+.comp-row:last-child{border-bottom:none}
+.comp-name{font-size:12px}
+.comp-detail{font-size:10px;color:var(--muted);margin-top:2px}
+.comp-amount{font-size:13px;font-weight:700;color:var(--accent)}
+.badge-rec{display:inline-block;padding:2px 7px;border-radius:20px;font-size:9px;background:#1A2A1A;color:var(--green);border:1px solid #2A4A28;margin-left:6px}
+.badge-one{display:inline-block;padding:2px 7px;border-radius:20px;font-size:9px;background:#2A2010;color:#FF9A3C;border:1px solid #4A3810;margin-left:6px}
+.progress-wrap{margin-bottom:14px}
+.progress-bar-bg{background:#1A1C25;border-radius:20px;height:8px;overflow:hidden;margin-top:6px}
+.progress-bar-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,var(--green),var(--accent));transition:width 0.5s}
+.progress-label{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:4px}
+.year-nav{display:flex;gap:8px;margin-bottom:14px}
+.yr-btn{padding:5px 18px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:monospace;font-size:12px;cursor:pointer}
+.yr-btn.active{background:#1C1E28;border-color:var(--accent);color:var(--accent);font-weight:600}
+.mes-nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.mes-btn{padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:11px;cursor:pointer}
+.mes-btn.active{background:var(--accent);color:#000;border-color:var(--accent);font-weight:600}
+.donativo-form{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.form-full{margin-bottom:10px}
+label{font-size:10px;color:var(--muted);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+input,select{width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:#12131A;color:var(--text);font-size:12px;font-family:monospace}
+input:focus,select:focus{outline:1px solid var(--accent);border-color:var(--accent)}
+.btn-add{width:100%;padding:10px;border-radius:8px;border:none;background:var(--accent);color:#000;font-size:13px;font-weight:700;cursor:pointer;font-family:monospace}
+.btn-add:hover{background:#d4a830}
+.donativos-list{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.don-item{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border)}
+.don-item:last-child{border-bottom:none}
+.don-info .don-name{font-size:12px;font-weight:600}
+.don-info .don-date{font-size:10px;color:var(--muted);margin-top:2px}
+.don-amount{font-size:13px;font-weight:700;color:var(--green)}
+.don-del{background:transparent;border:1px solid var(--border);color:var(--muted);font-size:10px;padding:3px 8px;border-radius:6px;cursor:pointer;margin-left:10px}
+.don-del:hover{border-color:var(--red);color:var(--red)}
+.empty{text-align:center;padding:2rem;color:var(--muted);font-size:12px}
+.nota-maaser{background:#12131A;border:1px solid var(--border);border-left:3px solid var(--gold);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.7}
+.nota-maaser span{color:var(--accent)}
+@media(max-width:420px){.grid3{grid-template-columns:repeat(2,1fr)}.form-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<h1>Maaser <span style="color:var(--accent)">·</span> מעשר</h1>
+<div class="sub">Jose Laniado · Control de tzedaká y donativos · 10% del ingreso</div>
+
+<div class="nota-maaser">
+  ✡ Maaser = (Ingreso − IVA − ISR) × 10% · Comprometido Aish: <span>Hoja Raquel $3,600/mes · $64,800 total</span> (May 2026 – Oct 2027 · 18 meses)
+</div>
+
+<div class="hero">
+  <div class="hero-label">Disponible para donar este mes</div>
+  <div class="hero-val" id="hero-disp">$0</div>
+  <div class="hero-sub" id="hero-sub">—</div>
+</div>
+
+<div class="grid3">
+  <div class="card">
+    <div class="lbl">Maaser del mes</div>
+    <div class="val val-yellow" id="card-maaser">$9,500</div>
+  </div>
+  <div class="card">
+    <div class="lbl">Compromisos fijos</div>
+    <div class="val val-red" id="card-comp">$0</div>
+  </div>
+  <div class="card">
+    <div class="lbl">Donado libre</div>
+    <div class="val val-green" id="card-donado">$0</div>
+  </div>
+</div>
+
+<div class="progress-wrap">
+  <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Uso del maaser mensual</div>
+  <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-bar" style="width:0%"></div></div>
+  <div class="progress-label"><span id="prog-left">disponible</span><span id="prog-pct">0%</span></div>
+</div>
+
+<div class="year-nav" id="year-nav"></div>
+<div class="mes-nav" id="mes-nav"></div>
+
+<div class="section-title">Compromisos fijos del mes</div>
+<div class="compromisos">
+  <div class="comp-header"><div class="comp-title">Compromisos automáticos</div><div class="comp-total" id="comp-total">$0</div></div>
+  <div id="comp-list"></div>
+</div>
+
+<div class="section-title">Registrar donativo libre</div>
+<div class="donativo-form">
+  <div class="form-row">
+    <div><label>Fecha</label><input type="date" id="f-fecha"></div>
+    <div><label>Monto ($MXN)</label><input type="number" id="f-monto" placeholder="0.00" step="0.01"></div>
+  </div>
+  <div class="form-full"><label>Destinatario / Organización</label><input type="text" id="f-dest" placeholder="Ej. Keren Hayesod, Donativos Shul..."></div>
+  <div class="form-full"><label>Nota</label><input type="text" id="f-nota" placeholder="Opcional"></div>
+  <button class="btn-add" onclick="agregarDonativo()">+ Registrar donativo</button>
+</div>
+
+<div class="section-title">Donativos libres del mes</div>
+<div class="donativos-list" id="don-list"></div>
+
+<script>
+// Maaser real por mes (ingreso × 10% − IVA − ISR, importado del CASH FLOW.xlsx)
+// Para meses sin dato usa ~$9,500 como estimado
+const MAASER_HISTORICO = {
+  '2025-1':8723,'2025-2':9149,'2025-3':7533,'2025-4':9508,
+  '2025-5':8734,'2025-6':9680,'2025-7':8324,'2025-8':8761,
+  '2025-9':8927,'2025-10':9127,'2025-11':8896,'2025-12':13533,
+  '2026-1':9089,'2026-2':9252,'2026-3':8960,'2026-4':9561,
+  '2026-5':7962, // estimado: $90,990 × 10% − ISR $1,137 · confirmar con Martha
+};
+function getMaaserMes(anio, mes) {
+  return MAASER_HISTORICO[`${anio}-${mes}`] || 9500;
+}
+const NM = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+
+// Compromisos fijos por mes
+function getCompromisos(anio, mes) {
+  const ym = anio * 100 + mes;
+  const items = [];
+  // Aish árbol — Hoja completa (Raquel): May 2026 – Oct 2027 (18 meses)
+  const aishC = ym - (2026 * 100 + 5) + 1;
+  if (aishC >= 1 && aishC <= 18) {
+    const u = aishC === 18;
+    items.push({ nombre: 'Aish HaTorah — Hoja árbol (Raquel)', detalle: `Cuota ${aishC}/18${u?' → último':''} · $64,800 total`, monto: 3600, tipo: 'rec' });
+  }
+  // Deuda organización — pago único mayo 2026
+  if (ym === 2026 * 100 + 5) {
+    items.push({ nombre: 'Deuda organización', detalle: 'Pago único · mayo 2026', monto: 8000, tipo: 'rec' });
+  }
+  return items;
+}
+
+// Historial importado del CASH FLOW.xlsx
+const HISTORICO = [
+  {id:'h001',fecha:'2022-09-01',monto:7250,dest:'Alia / Shabbaton 23',nota:''},
+  {id:'h002',fecha:'2022-10-01',monto:2759,dest:'Donativo Migdal Or',nota:''},
+  {id:'h003',fecha:'2022-10-01',monto:100,dest:'Asish',nota:''},
+  {id:'h004',fecha:'2022-11-01',monto:5500,dest:'Cuernavaca / Knis',nota:''},
+  {id:'h005',fecha:'2022-12-01',monto:12600,dest:'Alia Share',nota:''},
+  {id:'h006',fecha:'2022-12-01',monto:6000,dest:'Aish Shabat Shuva 25',nota:''},
+  {id:'h007',fecha:'2023-01-01',monto:1458,dest:'Bnei Akiva',nota:'Rosh Hashana 25'},
+  {id:'h008',fecha:'2023-01-01',monto:1000,dest:'Aish',nota:'Rosh Hashana 25'},
+  {id:'h009',fecha:'2023-03-01',monto:3500,dest:'Maor Abraham',nota:''},
+  {id:'h010',fecha:'2023-03-01',monto:1000,dest:'Aish',nota:''},
+  {id:'h011',fecha:'2023-05-01',monto:1700,dest:'Tzedaka Rosh Hashana',nota:''},
+  {id:'h012',fecha:'2023-05-01',monto:1000,dest:'Aish',nota:''},
+  {id:'h013',fecha:'2023-06-01',monto:3760,dest:'Mezuzot',nota:''},
+  {id:'h014',fecha:'2023-06-01',monto:1000,dest:'Pesaj Cuernavaca',nota:''},
+  {id:'h015',fecha:'2023-07-01',monto:11199,dest:'Valle Donativo',nota:''},
+  {id:'h016',fecha:'2023-07-01',monto:61290,dest:'Aish — Hoja del Árbol (Raquel)',nota:'$61,920 a TC $18'},
+  {id:'h017',fecha:'2023-09-01',monto:7500,dest:'Arija 24',nota:''},
+  {id:'h018',fecha:'2023-09-01',monto:30645,dest:'Aish — Hoja del Árbol (Vicky)',nota:''},
+  {id:'h019',fecha:'2023-10-01',monto:21600,dest:'Impulso',nota:''},
+  {id:'h020',fecha:'2023-12-01',monto:18000,dest:'Arija 25',nota:''},
+  {id:'h021',fecha:'2024-02-01',monto:824,dest:'Aish',nota:''},
+  {id:'h022',fecha:'2024-03-01',monto:12000,dest:'Donativo',nota:''},
+  {id:'h023',fecha:'2024-05-01',monto:100,dest:'Share Talmud',nota:''},
+  {id:'h024',fecha:'2024-06-01',monto:1379,dest:'Rifa Chabad',nota:''},
+  {id:'h025',fecha:'2024-10-01',monto:500,dest:'Avandaro',nota:''},
+  {id:'h026',fecha:'2024-11-01',monto:3636,dest:'Donativo Avandaro (impermeables)',nota:''},
+  {id:'h027',fecha:'2024-12-01',monto:2000,dest:'Suka Avivia',nota:''},
+  {id:'h028',fecha:'2025-01-01',monto:17010,dest:'Arija 26',nota:''},
+  {id:'h029',fecha:'2025-02-01',monto:1800,dest:'Tzedaka',nota:''},
+  {id:'h030',fecha:'2025-03-01',monto:4000,dest:'Sofer',nota:''},
+  {id:'h031',fecha:'2025-04-01',monto:5000,dest:'Avandaro',nota:''},
+  {id:'h032',fecha:'2025-05-01',monto:1400,dest:'Etrog y Lulav',nota:''},
+  {id:'h033',fecha:'2025-06-01',monto:2200,dest:'Purim',nota:''},
+];
+
+// Storage
+function loadDonativos() {
+  try { return JSON.parse(localStorage.getItem('maaser_donativos') || 'null'); } catch { return null; }
+}
+function saveDonativos(d) {
+  try { localStorage.setItem('maaser_donativos', JSON.stringify(d)); } catch {}
+}
+
+// Merge histórico con localStorage (solo donativos nuevos que el usuario agregue)
+let stored = loadDonativos();
+let donativos;
+if (!stored) {
+  donativos = [...HISTORICO];
+  saveDonativos(donativos);
+} else {
+  // Asegurar que el histórico siempre esté presente
+  const storedIds = new Set(stored.map(d => d.id));
+  const missing = HISTORICO.filter(h => !storedIds.has(h.id));
+  donativos = [...missing, ...stored];
+}
+let anioActual = 2026;
+let mesActual = new Date().getMonth() + 1;
+
+// Init fecha
+document.getElementById('f-fecha').value = new Date().toISOString().split('T')[0];
+
+function fmt(n) { return '$' + Math.round(n).toLocaleString('es-MX'); }
+
+function donativosMes() {
+  return donativos.filter(d => {
+    const dt = new Date(d.fecha + 'T00:00:00');
+    return dt.getFullYear() === anioActual && (dt.getMonth() + 1) === mesActual;
+  });
+}
+
+function render() {
+  const maaserMes = getMaaserMes(anioActual, mesActual);
+  const comps = getCompromisos(anioActual, mesActual);
+  const totalComp = comps.reduce((s, c) => s + c.monto, 0);
+  const donLibres = donativosMes();
+  const totalDon = donLibres.reduce((s, d) => s + d.monto, 0);
+  const disponible = maaserMes - totalComp - totalDon;
+  const usado = totalComp + totalDon;
+  const pct = Math.min(100, Math.round((usado / maaserMes) * 100));
+
+  // Hero
+  document.getElementById('hero-disp').textContent = fmt(Math.max(0, disponible));
+  document.getElementById('hero-disp').style.color = disponible >= 0 ? 'var(--green)' : 'var(--red)';
+  document.getElementById('hero-sub').textContent = disponible >= 0
+    ? `Después de compromisos ($${totalComp.toLocaleString('es-MX')}) y donativos libres ($${Math.round(totalDon).toLocaleString('es-MX')})`
+    : '⚠ Maaser del mes superado';
+
+  // Cards
+  document.getElementById('card-maaser').textContent = fmt(maaserMes);
+  document.getElementById('card-comp').textContent = fmt(totalComp);
+  document.getElementById('card-donado').textContent = fmt(totalDon);
+
+  // Progress
+  document.getElementById('prog-bar').style.width = pct + '%';
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('prog-left').textContent = disponible >= 0 ? `${fmt(disponible)} disponible` : `${fmt(Math.abs(disponible))} excedido`;
+
+  // Compromisos
+  document.getElementById('comp-total').textContent = fmt(totalComp);
+  const cl = document.getElementById('comp-list');
+  if (!comps.length) {
+    cl.innerHTML = '<div class="empty">Sin compromisos fijos este mes</div>';
+  } else {
+    cl.innerHTML = comps.map(c => `
+      <div class="comp-row">
+        <div>
+          <div class="comp-name">${c.nombre}<span class="badge-rec">RECURRENTE</span></div>
+          <div class="comp-detail">${c.detalle}</div>
+        </div>
+        <div class="comp-amount">${fmt(c.monto)}</div>
+      </div>`).join('');
+  }
+
+  // Donativos libres
+  const dl = document.getElementById('don-list');
+  if (!donLibres.length) {
+    dl.innerHTML = '<div class="empty">Sin donativos libres registrados este mes</div>';
+  } else {
+    dl.innerHTML = donLibres.sort((a, b) => b.fecha.localeCompare(a.fecha)).map(d => `
+      <div class="don-item">
+        <div class="don-info">
+          <div class="don-name">${d.dest}</div>
+          <div class="don-date">${d.fecha}${d.nota ? ' · ' + d.nota : ''}</div>
+        </div>
+        <div style="display:flex;align-items:center">
+          <div class="don-amount">${fmt(d.monto)}</div>
+          <button class="don-del" onclick="eliminarDonativo('${d.id}')">✕</button>
+        </div>
+      </div>`).join('');
+  }
+}
+
+function renderNav() {
+  // Años
+  const yn = document.getElementById('year-nav');
+  yn.innerHTML = [2022,2023,2024,2025,2026,2027].map(a => `
+    <button class="yr-btn${a === anioActual ? ' active' : ''}" onclick="setAnio(${a})">${a}</button>`).join('');
+  // Meses
+  const mn = document.getElementById('mes-nav');
+  mn.innerHTML = NM.map((m, i) => `
+    <button class="mes-btn${(i + 1) === mesActual ? ' active' : ''}" onclick="setMes(${i + 1})">${m.slice(0, 3)}</button>`).join('');
+}
+
+function setAnio(a) { anioActual = a; renderNav(); render(); }
+function setMes(m) { mesActual = m; renderNav(); render(); }
+
+function agregarDonativo() {
+  const fecha = document.getElementById('f-fecha').value;
+  const monto = parseFloat(document.getElementById('f-monto').value) || 0;
+  const dest = document.getElementById('f-dest').value.trim();
+  const nota = document.getElementById('f-nota').value.trim();
+  if (!fecha || !monto || !dest) { alert('Fecha, monto y destinatario son requeridos'); return; }
+  donativos.push({ id: Date.now().toString(), fecha, monto, dest, nota });
+  saveDonativos(donativos);
+  document.getElementById('f-monto').value = '';
+  document.getElementById('f-dest').value = '';
+  document.getElementById('f-nota').value = '';
+  render();
+}
+
+function eliminarDonativo(id) {
+  if (!confirm('¿Eliminar este donativo?')) return;
+  donativos = donativos.filter(d => d.id !== id);
+  saveDonativos(donativos);
+  render();
+}
+
+renderNav();
+render();
+</script>
+</body>
+</html>
