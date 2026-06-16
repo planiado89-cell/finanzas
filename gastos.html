@@ -549,12 +549,12 @@ let gastos=JSON.parse(localStorage.getItem("gp_jose_v3")||"[]");
 })();
 // Gym — jun-2026
 (function(){
-  const KEY="gp_jose_migr_gym_jun2026_v1";
+  const KEY="gp_jose_migr_gym_jun2026_v2";
   if(localStorage.getItem(KEY))return;
   const id=4000000000000;
-  if(!gastos.some(g=>g.id===id)){
-    gastos.push({id,fecha:"2026-06-15",tipo:"Gasto",categoria:"SALUD",detalle:"Gym · mensualidad · transferencia",monto:4000.00});
-  }
+  const idx=gastos.findIndex(g=>g.id===id);
+  if(idx>=0){gastos.splice(idx,1);}
+  gastos.push({id,fecha:"2026-06-15",tipo:"Gasto",categoria:"SALUD",detalle:"Gym · 9 clases · $500/clase · 1 persona · transferencia",monto:4500.00});
   try{localStorage.setItem("gp_jose_v3",JSON.stringify(gastos));}catch{}
   localStorage.setItem(KEY,"1");
 })();
@@ -652,6 +652,17 @@ let gastos=JSON.parse(localStorage.getItem("gp_jose_v3")||"[]");
     {i:1,fecha:"2026-06-16",tipo:"Gasto",categoria:"AGUA",detalle:"Agua · jun-2026",monto:180.00},
   ];
   entradas.forEach(e=>{const id=BASE_ID+e.i*1000;if(!gastos.some(g=>g.id===id)){gastos.push({id,...e});}});
+  try{localStorage.setItem("gp_jose_v3",JSON.stringify(gastos));}catch{}
+  localStorage.setItem(KEY,"1");
+})();
+// Mtto Residencial Avivia — jun-2026
+(function(){
+  const KEY="gp_jose_migr_residencial_jun2026_v1";
+  if(localStorage.getItem(KEY))return;
+  const id=4700000000000;
+  if(!gastos.some(g=>g.id===id)){
+    gastos.push({id,fecha:"2026-06-08",tipo:"Gasto",categoria:"MTTO CASA (mantenimiento)",detalle:"Conjunto Residencial Avivia · mantenimiento jun-2026 · Banamex *578",monto:12694.00});
+  }
   try{localStorage.setItem("gp_jose_v3",JSON.stringify(gastos));}catch{}
   localStorage.setItem(KEY,"1");
 })();
