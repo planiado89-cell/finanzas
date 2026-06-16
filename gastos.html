@@ -166,6 +166,14 @@ const GRUPOS=[
 
 // Reset por URL: gastos.html?reset=1
 if(new URLSearchParams(location.search).get('reset')==='1'){localStorage.clear();location.href=location.pathname;}
+// Auto-reset de migraciones cuando hay nueva versión publicada
+(function(){
+  const DATA_VER="v20260616_02";
+  if(localStorage.getItem("gp_jose_data_ver")!==DATA_VER){
+    Object.keys(localStorage).filter(k=>k.startsWith("gp_jose_migr_")).forEach(k=>localStorage.removeItem(k));
+    localStorage.setItem("gp_jose_data_ver",DATA_VER);
+  }
+})();
 let gastos=JSON.parse(localStorage.getItem("gp_jose_v3")||"[]");
 // Migración: Estado de Cuenta Amex Gold · corte 13 May 2026
 (function(){
