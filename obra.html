@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Control Obra — Jose Laniado</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f5f5f5;color:#222;max-width:680px;margin:0 auto;padding:12px}
+h2{font-size:18px;font-weight:600;margin-bottom:2px}
+.sub{font-size:12px;color:#888;margin-bottom:14px}
+.badge{display:inline-block;background:#FFF2CC;color:#BF8F00;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;margin-left:8px;vertical-align:middle}
+.acumulado-box{background:#1F3864;color:#fff;border-radius:12px;padding:16px;margin-bottom:14px}
+.acum-title{font-size:11px;color:#BDD7EE;margin-bottom:4px}
+.acum-val{font-size:28px;font-weight:700;margin-bottom:8px}
+.acum-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.acum-item{background:rgba(255,255,255,0.1);border-radius:8px;padding:8px 10px}
+.acum-item .lbl{font-size:10px;color:#BDD7EE;margin-bottom:2px}
+.acum-item .val{font-size:14px;font-weight:600}
+.anio-row{display:flex;gap:5px;margin-bottom:8px;flex-wrap:wrap}
+.anio-btn{padding:4px 12px;font-size:12px;border-radius:20px;border:1px solid #ccc;background:transparent;cursor:pointer;color:#555}
+.anio-btn.active{background:#FFF2CC;border-color:#BF8F00;color:#7B5500;font-weight:600}
+.meses{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px}
+.mes-btn{padding:4px 10px;font-size:12px;border-radius:20px;border:1px solid #ccc;background:transparent;cursor:pointer;color:#555}
+.mes-btn.active{background:#FFF2CC;border-color:#BF8F00;color:#7B5500;font-weight:600}
+.mes-btn.has-data{border-color:#BF8F00;color:#7B5500}
+.metricas{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.metrica{border-radius:8px;padding:10px 12px}
+.metrica .lbl{font-size:11px;margin-bottom:3px}
+.metrica .val{font-size:14px;font-weight:600}
+.mo{background:#FFF2CC;color:#7B5500}
+.mat{background:#FCE4D6;color:#7B2C00}
+.tot{background:#DEEAF1;color:#1F3864}
+.tabs{display:flex;gap:6px;margin-bottom:14px;border-bottom:1px solid #e0e0e0;padding-bottom:8px}
+.tab{padding:6px 14px;font-size:13px;border-radius:8px;border:1px solid #ddd;background:transparent;cursor:pointer;color:#555}
+.tab.active{background:#f0f0f0;border-color:#aaa;color:#222;font-weight:600}
+.card{background:#fff;border:1px solid #e0e0e0;border-radius:12px;padding:14px;margin-bottom:8px}
+.card-title{font-size:13px;font-weight:600;margin-bottom:12px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.form-full{margin-bottom:10px}
+label{font-size:11px;color:#888;display:block;margin-bottom:4px}
+input,select{width:100%;padding:8px 10px;border-radius:8px;border:1px solid #ddd;font-size:13px;background:#fff;color:#222}
+input:focus,select:focus{outline:2px solid #BF8F00;border-color:#BF8F00}
+.btn-primary{flex:1;padding:10px;border-radius:8px;border:none;background:#BF8F00;color:#fff;font-size:13px;font-weight:600;cursor:pointer}
+.btn-primary:hover{background:#9A7400}
+.btn-cancel{padding:10px 16px;border-radius:8px;border:1px solid #ddd;background:transparent;font-size:13px;cursor:pointer;color:#888}
+.mov-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border:1px solid #e8e8e8;border-radius:10px;margin-bottom:6px}
+.dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.mov-info{flex:1;min-width:0}
+.mov-cat{font-size:13px;font-weight:600}
+.mov-fecha{font-size:11px;color:#888}
+.mov-monto{font-size:13px;font-weight:600;flex-shrink:0;color:#BF8F00}
+.mov-acciones{display:flex;gap:4px;flex-shrink:0}
+.btn-sm{padding:3px 8px;font-size:11px;border-radius:6px;border:1px solid #ddd;background:transparent;cursor:pointer}
+.resumen-box{background:#f7f7f7;border-radius:10px;padding:12px 14px;margin-top:14px}
+.res-row{display:flex;justify-content:space-between;font-size:13px;margin-bottom:7px}
+.res-row:last-child{margin-bottom:0;border-top:1px solid #e0e0e0;padding-top:8px;font-weight:600;font-size:14px}
+.semanas-box{background:#FFF9E6;border:1px solid #F0D060;border-radius:10px;padding:12px 14px;margin-top:10px}
+.semana-item{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #F0D060}
+.semana-item:last-child{border-bottom:none;font-weight:600}
+.empty{text-align:center;padding:2rem;color:#aaa;font-size:13px}
+.footer{text-align:center;font-size:11px;color:#bbb;margin-top:14px}
+.btn-row{display:flex;gap:8px}
+.notif{position:fixed;top:16px;right:16px;background:#BF8F00;color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:999}
+.notif.show{opacity:1}
+@media(max-width:400px){.metricas{grid-template-columns:repeat(2,1fr)}.form-row{grid-template-columns:1fr}.acum-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="notif" id="notif">Guardado</div>
+<h2>Control de Obra <span class="badge">Obra casa</span></h2>
+<div class="sub">Jose Laniado — Remodelación Secretaría de Marina</div>
+<div class="anio-row" id="anios"></div>
+
+<!-- Acumulado total -->
+<div class="acumulado-box">
+  <div class="acum-title" id="acum-title">TOTAL ACUMULADO OBRA</div>
+  <div class="acum-val" id="total-acum">$0</div>
+  <div class="acum-grid">
+    <div class="acum-item"><div class="lbl">Mano de obra</div><div class="val" id="acum-mo">$0</div></div>
+    <div class="acum-item"><div class="lbl">Material</div><div class="val" id="acum-mat">$0</div></div>
+    <div class="acum-item"><div class="lbl">Proveedores</div><div class="val" id="acum-prov">$0</div></div>
+  </div>
+</div>
+
+<div class="meses" id="meses"></div>
+
+<div class="metricas">
+  <div class="metrica mo"><div class="lbl">Mano de obra (mes)</div><div class="val" id="m-mo">$0</div></div>
+  <div class="metrica mat"><div class="lbl">Material (mes)</div><div class="val" id="m-mat">$0</div></div>
+  <div class="metrica tot"><div class="lbl">Total del mes</div><div class="val" id="m-tot">$0</div></div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="setTab('registrar')">Registrar</button>
+  <button class="tab" onclick="setTab('movimientos')">Movimientos</button>
+  <button class="tab" onclick="setTab('resumen')">Resumen</button>
+</div>
+
+<div id="tab-registrar">
+  <div class="card">
+    <div class="card-title" id="form-title">Nuevo gasto de obra</div>
+    <div class="form-row">
+      <div><label>Fecha</label><input type="date" id="f-fecha"></div>
+      <div><label>Tipo de gasto</label>
+        <select id="f-tipo">
+          <optgroup label="Mano de obra">
+            <option value="Luis Segundo — semana">Luis Segundo — semana</option>
+            <option value="Luis Segundo — material extra">Luis Segundo — material extra</option>
+            <option value="Ezequiel (marmolero)">Ezequiel (marmolero)</option>
+            <option value="Santos Calvario (cocina)">Santos Calvario (cocina)</option>
+            <option value="Otro contratista">Otro contratista</option>
+          </optgroup>
+          <optgroup label="Materiales">
+            <option value="Material general">Material general</option>
+            <option value="Encino / madera">Encino / madera</option>
+            <option value="Mármol">Mármol</option>
+            <option value="Iluminación / LED">Iluminación / LED</option>
+            <option value="Herrajes / bisagras">Herrajes / bisagras</option>
+            <option value="Pintura / Comex">Pintura / Comex</option>
+            <option value="Plomería / electricidad">Plomería / electricidad</option>
+            <option value="Pisos">Pisos</option>
+            <option value="Material cuarto principal">Material cuarto principal</option>
+            <option value="Material cocina">Material cocina</option>
+            <option value="Gasolina / flete">Gasolina / flete</option>
+          </optgroup>
+          <optgroup label="Proveedores">
+            <option value="Anticipo proveedor">Anticipo proveedor</option>
+            <option value="Pago final proveedor">Pago final proveedor</option>
+          </optgroup>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div><label>Proveedor</label>
+        <select id="f-prov">
+          <option value="LUIS SEGUNDO">Luis Segundo</option>
+          <option value="EZEQUIEL">Ezequiel (marmolero)</option>
+          <option value="SANTOS CALVARIO">Santos Calvario (cocina)</option>
+          <option value="farca">Farca (iluminación)</option>
+          <option value="Otro">Otro</option>
+        </select>
+      </div>
+      <div><label>Monto ($)</label><input type="number" id="f-monto" step="0.01"></div>
+    </div>
+    <div class="form-full"><label>Detalle / Nota</label><input type="text" id="f-detalle" placeholder="Ej. Semana del 14 al 18, encino cuarto principal..."></div>
+    <div class="btn-row">
+      <button class="btn-cancel" onclick="cancelEdit()" style="display:none" id="btn-cancelar">Cancelar</button>
+      <button class="btn-primary" onclick="guardar()">+ Registrar gasto</button>
+    </div>
+  </div>
+</div>
+
+<div id="tab-movimientos" style="display:none">
+  <div id="lista-movs"></div>
+</div>
+
+<div id="tab-resumen" style="display:none">
+  <div class="card">
+    <div class="card-title">Resumen del mes</div>
+    <div class="resumen-box">
+      <div class="res-row"><span>Mano de obra:</span><span id="res-mo">$0</span></div>
+      <div class="res-row"><span>Material:</span><span id="res-mat">$0</span></div>
+      <div class="res-row"><span>Proveedores:</span><span id="res-prov">$0</span></div>
+      <div class="res-row"><span>Total del mes:</span><span id="res-tot">$0</span></div>
+    </div>
+    <div class="semanas-box">
+      <div class="semana-item"><span>Semanas de Luis Segundo:</span><span id="sem-count">0</span></div>
+      <div class="semana-item"><span>Total mano de obra Luis:</span><span id="sem-total">$0</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="footer" id="footer-count">0 movimientos registrados en total</div>
+
+<script>
+const GASTOS_DATA_INLINE = [{"id":1800000000000,"fecha":"2025-06-05","categoria":"Luis Segundo — semana","proveedor":"LUIS SEGUNDO","monto":6000.0,"detalle":"SEMANA 23"},{"id":1800000001000,"fecha":"2025-06-09","categoria":"Luis Segundo — semana","proveedor":"LUIS SEGUNDO","monto":6000.0,"detalle":"SEMANA 24"},{"id":1800000002000,"fecha":"2025-06-13","categoria":"Luis Segundo — semana","proveedor":"LUIS SEGUNDO","monto":6000.0,"detalle":"SEMANA 24"},{"id":1800000003000,"fecha":"2025-06-23","categoria":"Encino / madera","proveedor":"LUIS SEGUNDO","monto":5310.0,"detalle":"ENCINO"},{"id":1800000004000,"fecha":"2025-06-26","categoria":"Anticipo proveedor","proveedor":"SANTOS CALVARIO","monto":76555.0,"detalle":"ANTICIPO"},{"id":1800000005000,"fecha":"2025-06-30","categoria":"Luis Segundo — semana","proveedor":"LUIS SEGUNDO","monto":6000.0,"detalle":"SEMANA 27"},{"id":1800000006000,"fecha":"2025-07-01","categoria":"Encino / madera","proveedor":"LUIS SEGUNDO","monto":8340.0,"detalle":"ENCINO"},{"id":1800000007000,"fecha":"2025-07-11","categoria":"Luis Segundo — semana","proveedor":"LUIS SEGUNDO","monto":6000.0,"detalle":"SEMANA 28"},{"id":1800000008000,"fecha":"2025-07-15","categoria":"Encino / madera","proveedor":"LUIS SEGUNDO","monto":5220.0,"detalle":"TABLON ENCINO"},{"id":1800000009000,"fecha":"2025-07-16","categoria":"Material general","proveedor":"LUIS SEGUNDO","monto":562.0,"detalle":""},{"id":1800000010000,"fecha":"2025-07-21","categoria":"Luis Segundo — semana","proveedor":"LUIS SEGUNDO","monto":6000.0,"detalle":"SEMANA 30"},{"id":1800000011000,"fecha":"2025-07-24","categoria":"Herrajes / bisagras","proveedor":"LUIS SEGUNDO","monto":1500.0,"detalle":"BISAGRAS Y TUBO PARA GANCHOS"},{"id":1800000012000,"fecha":"2025-07-24","categoria":"Luis Segundo — semana","proveedor":"LUIS SEGUNDO","monto":6000.0,"detalle":"SEMANA 30"},{"id":1800000013000,"fecha":"2025-07-28","categoria":"Encino / madera","proveedor":"LUIS SEGUNDO","monto":4035.0,"detalle":"ENCINO"},{"id":1800000014000,"fecha":"2025-07-28","categoria":"Gasolina / flete","proveedor":"LUIS SEGUNDO","monto":700.0,"detalle":"GASOLINA"},{"id":1800000015000,"fecha":"2025-08-01","categoria":"Luis Segundo — semana","proveedor":"Otro","monto":6000.0,"detalle":"SEMANA 31"},{"id":1800000016000,"fecha":"2025-08-01","categoria":"Mármol","proveedor":"Otro","monto":29816.64,"detalle":"MARMOL"},{"id":1800000017000,"fecha":"2025-08-01","categoria":"Material general","proveedor":"Otro","monto":4500.0,"detalle":"MATERIAL"},{"id":1800000018000,"fecha":"2025-08-08","categoria":"Material general","proveedor":"Otro","monto":6000.0,"detalle":"MATERIAL"},{"id":1800000019000,"fecha":"2025-08-01","categoria":"Mármol","proveedor":"EZEQUIEL","monto":20000.0,"detalle":"MAMOLERO"},{"id":1800000020000,"fecha":"2025-08-04","categoria":"Material general","proveedor":"LUIS SEGUNDO","monto":1000.0,"detalle":"POTFILER"},{"id":1800000021000,"fecha":"2025-08-07","categoria":"Luis Segundo — semana","proveedor":"LUIS SEGUNDO","monto":6000.0,"detalle":"SEMANA 32"},{"id":1800000022000,"fecha":"2025-08-08","categoria":"Material general","proveedor":"Otro","monto":2000.0,"detalle":"material"},{"id":1800000023000,"fecha":"2025-08-15","categoria":"Luis Segundo — semana","proveedor":"Otro","monto":6000.0,"detalle":"SEMANA 33"},{"id":1800000024000,"fecha":"2025-08-08","categoria":"Material cocina","proveedor":"Otro","monto":800.0,"detalle":"PASTILLA HORNO"},{"id":1800000025000,"fecha":"2025-08-19","categoria":"Material general","proveedor":"Otro","monto":1200.0,"detalle":"MATERIAL"},{"id":1800000026000,"fecha":"2025-08-21","categoria":"Luis Segundo — semana","proveedor":"Otro","monto":6000.0,"detalle":"SEMANA 34"},{"id":1800000027000,"fecha":"2025-08-22","categoria":"Material general","proveedor":"Otro","monto":1350.0,"detalle":"COCINA"},{"id":1800000028000,"fecha":"2025-08-23","categoria":"Material cocina","proveedor":"Otro","monto":9000.0,"detalle":"HORNO"},{"id":1800000029000,"fecha":"2025-08-25","categoria":"Material general","proveedor":"Otro","monto":600.0,"detalle":"MATERIAL"},{"id":1800000030000,"fecha":"2025-09-08","categoria":"Mármol","proveedor":"EZEQUIEL","monto":13000.0,"detalle":"MARMOL"},{"id":1800000031000,"fecha":"2025-08-28","categoria":"Luis Segundo — semana","proveedor":"LUIS SEGUNDO","monto":2400.0,"detalle":"SEMANA 35"},{"id":1800000032000,"fecha":"2025-09-10","categoria":"Material general","proveedor":"Otro","monto":8000.0,"detalle":"MATERIAL CASA"},{"id":1800000033000,"fecha":"2025-09-12","categoria":"Material general","proveedor":"Otro","monto":618.0,"detalle":"material comex"},{"id":1800000034000,"fecha":"2025-09-12","categoria":"Luis Segundo — semana","proveedor":"Otro","monto":3600.0,"detalle":"SEMANA 37"},{"id":1800000035000,"fecha":"2025-09-19","categoria":"Luis Segundo — semana","proveedor":"Otro","monto":7000.0,"detalle":"SEMANA 38"},{"id":1800000036000,"fecha":"2025-10-18","categoria":"Luis Segundo — semana","proveedor":"Otro","monto":6000.0,"detalle":"SEMANA 42"},{"id":1800000037000,"fecha":"2025-10-19","categoria":"Material general","proveedor":"Otro","monto":2000.0,"detalle":"material"},{"id":1800000038000,"fecha":"2025-10-01","categoria":"Material general","proveedor":"Otro","monto":1000.0,"detalle":"material"},{"id":1800000039000,"fecha":"2025-10-21","categoria":"Material general","proveedor":"farca","monto":2000.0,"detalle":"material iluinacion"},{"id":1800000040000,"fecha":"2025-10-25","categoria":"Luis Segundo — semana","proveedor":"Otro","monto":4800.0,"detalle":"SEMANA 43"},{"id":1800000041000,"fecha":"2026-03-23","categoria":"Material general","proveedor":"Otro","monto":3500.0,"detalle":"MATERIAL CUARTO P"},{"id":1800000042000,"fecha":"2026-04-22","categoria":"Luis Segundo — semana","proveedor":"LUIS SEGUNDO","monto":6000.0,"detalle":"SEMANA 17"},{"id":1800000043000,"fecha":"2026-04-22","categoria":"Material cuarto principal","proveedor":"Otro","monto":500.0,"detalle":"Material baño principal"},{"id":1800000044000,"fecha":"2026-04-22","categoria":"Material general","proveedor":"Otro","monto":1206.0,"detalle":"Material obra"},{"id":1800000045000,"fecha":"2026-05-08","categoria":"Luis Segundo — semana","proveedor":"LUIS SEGUNDO","monto":6000.0,"detalle":"SEMANA 19"}];
+
+const MESES=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+const MO_CATS=["Luis Segundo — semana","Luis Segundo — material extra","Ezequiel (marmolero)","Santos Calvario (cocina)","Otro contratista"];
+const MAT_CATS=["Material general","Encino / madera","Mármol","Iluminación / LED","Herrajes / bisagras","Pintura / Comex","Plomería / electricidad","Pisos","Material cuarto principal","Material cocina","Gasolina / flete"];
+
+let gastos = JSON.parse(localStorage.getItem("gp_jose_obra") || JSON.stringify(GASTOS_DATA_INLINE));
+// Migración: material 14 mayo 2026
+(function(){
+  const KEY="obra_migr_may2026_v3";
+  if(localStorage.getItem(KEY))return;
+  const entradas=[
+    {id:1800000046000,fecha:"2026-05-14",categoria:"Material cuarto principal",proveedor:"Otro",monto:600,detalle:"MATERIAL CUARTO PRINCIPAL"},
+    {id:1800000047000,fecha:"2026-05-15",categoria:"Luis Segundo — semana",proveedor:"LUIS SEGUNDO",monto:6000,detalle:"SEMANA 20"},
+  ];
+  entradas.forEach(e=>{if(!gastos.some(g=>g.id===e.id))gastos.push(e);});
+  try{localStorage.setItem("gp_jose_obra",JSON.stringify(gastos));}catch{}
+  localStorage.setItem(KEY,"1");
+})();
+// Luis — mantenimiento / obra jun-2026
+(function(){
+  const KEY="obra_migr_jun2026_v1";
+  if(localStorage.getItem(KEY))return;
+  const id=1800000048000;
+  if(!gastos.some(g=>g.id===id)){
+    gastos.push({id,fecha:"2026-06-02",categoria:"Luis Segundo — semana",proveedor:"LUIS SEGUNDO",monto:2400,detalle:"SEMANA JUN-2026"});
+  }
+  try{localStorage.setItem("gp_jose_obra",JSON.stringify(gastos));}catch{}
+  localStorage.setItem(KEY,"1");
+})();
+// Luis — semana jun-2026 (2)
+(function(){
+  const KEY="obra_migr_jun2026_v2";
+  if(localStorage.getItem(KEY))return;
+  const id=1800000049000;
+  if(!gastos.some(g=>g.id===id)){
+    gastos.push({id,fecha:"2026-06-15",categoria:"Luis Segundo — semana",proveedor:"LUIS SEGUNDO",monto:3600,detalle:"SEMANA JUN-2026"});
+  }
+  try{localStorage.setItem("gp_jose_obra",JSON.stringify(gastos));}catch{}
+  localStorage.setItem(KEY,"1");
+})();
+let mesActual=new Date().getMonth();
+let anioActual=new Date().getFullYear();
+let editId=null;
+document.getElementById("f-fecha").value=new Date().toISOString().split("T")[0];
+
+function save(){try{localStorage.setItem("gp_jose_obra",JSON.stringify(gastos));}catch{}}
+function fmt(n){return"$"+Math.round(Math.abs(n)).toLocaleString("es-MX")}
+function notif(m){const n=document.getElementById("notif");n.textContent=m;n.classList.add("show");setTimeout(()=>n.classList.remove("show"),2000)}
+function gastosAnio(){return gastos.filter(g=>{const d=new Date(g.fecha+"T00:00:00");return d.getFullYear()===anioActual;})}
+function gastosMes(){return gastos.filter(g=>{const d=new Date(g.fecha+"T00:00:00");return d.getFullYear()===anioActual&&d.getMonth()===mesActual;})}
+
+function tipoGasto(cat){
+  if(MO_CATS.includes(cat)) return "mo";
+  if(MAT_CATS.includes(cat)) return "mat";
+  return "prov";
+}
+function colorCat(cat){
+  const t=tipoGasto(cat);
+  return t==="mo"?"#BF8F00":t==="mat"?"#C55A11":"#2E75B6";
+}
+
+function getAnios(){
+  const anos=new Set(gastos.map(g=>new Date(g.fecha+"T00:00:00").getFullYear()));
+  return Array.from(anos).sort();
+}
+function renderAnios(){
+  const c=document.getElementById("anios");c.innerHTML="";
+  const anos=getAnios();
+  if(!anos.includes(anioActual))anioActual=anos[anos.length-1]||new Date().getFullYear();
+  anos.forEach(a=>{
+    const b=document.createElement("button");
+    b.className="anio-btn"+(a===anioActual?" active":"");
+    b.textContent=a;
+    b.onclick=()=>{anioActual=a;renderAnios();renderMeses();renderTodo();};
+    c.appendChild(b);
+  });
+}
+function renderMeses(){
+  const c=document.getElementById("meses");c.innerHTML="";
+  const mesesConDatos=new Set(gastosAnio().map(g=>new Date(g.fecha+"T00:00:00").getMonth()));
+  MESES.forEach((m,i)=>{
+    const b=document.createElement("button");
+    const activo=i===mesActual;
+    const tieneData=mesesConDatos.has(i);
+    b.className="mes-btn"+(activo?" active":tieneData?" has-data":"");
+    b.textContent=m.slice(0,3);
+    b.onclick=()=>{mesActual=i;renderMeses();renderTodo()};
+    c.appendChild(b);
+  });
+}
+
+function calcTotales(lista){
+  const mo=lista.filter(g=>tipoGasto(g.categoria)==="mo").reduce((s,g)=>s+g.monto,0);
+  const mat=lista.filter(g=>tipoGasto(g.categoria)==="mat").reduce((s,g)=>s+g.monto,0);
+  const prov=lista.filter(g=>tipoGasto(g.categoria)==="prov").reduce((s,g)=>s+g.monto,0);
+  return{mo,mat,prov,tot:mo+mat+prov};
+}
+
+function renderMetricas(){
+  const gm=gastosMes();
+  const t=calcTotales(gm);
+  document.getElementById("m-mo").textContent=fmt(t.mo);
+  document.getElementById("m-mat").textContent=fmt(t.mat);
+  document.getElementById("m-tot").textContent=fmt(t.tot);
+  const ga=gastosAnio();
+  const ta=calcTotales(ga);
+  document.getElementById("acum-title").textContent="TOTAL ACUMULADO "+anioActual;
+  document.getElementById("total-acum").textContent=fmt(ta.tot);
+  document.getElementById("acum-mo").textContent=fmt(ta.mo);
+  document.getElementById("acum-mat").textContent=fmt(ta.mat);
+  document.getElementById("acum-prov").textContent=fmt(ta.prov);
+  const gTotal=gastos.length;
+  document.getElementById("footer-count").textContent=gTotal+" movimiento"+(gTotal!==1?"s":"")+" registrado"+(gTotal!==1?"s":"")+" en total";
+}
+
+function renderMovimientos(){
+  const gm=gastosMes();
+  const c=document.getElementById("lista-movs");
+  if(!gm.length){c.innerHTML='<div class="empty">Sin movimientos en '+MESES[mesActual]+'.</div>';return;}
+  c.innerHTML="";
+  gm.sort((a,b)=>b.fecha.localeCompare(a.fecha)||b.id-a.id).forEach(g=>{
+    const d=document.createElement("div");
+    d.className="mov-item";
+    d.innerHTML=`
+      <div class="dot" style="background:${colorCat(g.categoria)}"></div>
+      <div class="mov-info">
+        <div class="mov-cat">${g.categoria}</div>
+        <div class="mov-fecha">${g.fecha} · ${g.proveedor}${g.detalle?' · '+g.detalle:''}</div>
+      </div>
+      <div class="mov-monto">${fmt(g.monto)}</div>
+      <div class="mov-acciones">
+        <button class="btn-sm" onclick="editar(${g.id})">Editar</button>
+        <button class="btn-sm" onclick="eliminar(${g.id})">Eliminar</button>
+      </div>
+    `;
+    c.appendChild(d);
+  });
+}
+
+function renderResumen(){
+  const gm=gastosMes();
+  const t=calcTotales(gm);
+  document.getElementById("res-mo").textContent=fmt(t.mo);
+  document.getElementById("res-mat").textContent=fmt(t.mat);
+  document.getElementById("res-prov").textContent=fmt(t.prov);
+  document.getElementById("res-tot").textContent=fmt(t.tot);
+  const semanas=gm.filter(g=>g.categoria==="Luis Segundo — semana");
+  document.getElementById("sem-count").textContent=semanas.length;
+  document.getElementById("sem-total").textContent=fmt(semanas.reduce((s,g)=>s+g.monto,0));
+}
+
+function renderTodo(){renderMetricas();renderMovimientos();renderResumen();}
+
+function setTab(t){
+  document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
+  document.getElementById("tab-registrar").style.display="none";
+  document.getElementById("tab-movimientos").style.display="none";
+  document.getElementById("tab-resumen").style.display="none";
+  if(t==="registrar"){document.querySelectorAll(".tab")[0].classList.add("active");document.getElementById("tab-registrar").style.display="block";}
+  else if(t==="movimientos"){document.querySelectorAll(".tab")[1].classList.add("active");document.getElementById("tab-movimientos").style.display="block";renderMovimientos();}
+  else{document.querySelectorAll(".tab")[2].classList.add("active");document.getElementById("tab-resumen").style.display="block";renderResumen();}
+}
+
+function guardar(){
+  const fecha=document.getElementById("f-fecha").value;
+  const cat=document.getElementById("f-tipo").value;
+  const prov=document.getElementById("f-prov").value;
+  const monto=parseFloat(document.getElementById("f-monto").value)||0;
+  const det=document.getElementById("f-detalle").value.trim();
+  if(!fecha||monto<=0){notif("Fecha y monto requeridos");return;}
+  if(editId){
+    const g=gastos.find(x=>x.id===editId);
+    if(g){g.fecha=fecha;g.categoria=cat;g.proveedor=prov;g.monto=monto;g.detalle=det;}
+    editId=null;
+    document.getElementById("form-title").textContent="Nuevo gasto de obra";
+    document.getElementById("btn-cancelar").style.display="none";
+    notif("Editado");
+  }else{
+    const id=Date.now()*1000+Math.floor(Math.random()*1000);
+    gastos.push({id,fecha,categoria:cat,proveedor:prov,monto,detalle:det});
+    notif("Registrado");
+  }
+  save();
+  document.getElementById("f-fecha").value=new Date().toISOString().split("T")[0];
+  document.getElementById("f-monto").value="";
+  document.getElementById("f-detalle").value="";
+  renderTodo();
+}
+
+function editar(id){
+  const g=gastos.find(x=>x.id===id);
+  if(!g)return;
+  editId=id;
+  document.getElementById("f-fecha").value=g.fecha;
+  document.getElementById("f-tipo").value=g.categoria;
+  document.getElementById("f-prov").value=g.proveedor;
+  document.getElementById("f-monto").value=g.monto;
+  document.getElementById("f-detalle").value=g.detalle||"";
+  document.getElementById("form-title").textContent="Editar gasto";
+  document.getElementById("btn-cancelar").style.display="block";
+  setTab("registrar");
+}
+
+function cancelEdit(){
+  editId=null;
+  document.getElementById("form-title").textContent="Nuevo gasto de obra";
+  document.getElementById("btn-cancelar").style.display="none";
+  document.getElementById("f-fecha").value=new Date().toISOString().split("T")[0];
+  document.getElementById("f-monto").value="";
+  document.getElementById("f-detalle").value="";
+}
+
+function eliminar(id){
+  if(!confirm("¿Eliminar este gasto?"))return;
+  gastos=gastos.filter(g=>g.id!==id);
+  save();
+  renderTodo();
+  notif("Eliminado");
+}
+
+renderAnios();
+renderMeses();
+renderTodo();
+</script>
+</body>
+</html>
