@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Esquema de Pagos — Jose Laniado</title>
+
+<style>
+:root{--bg:#0E0F13;--surface:#161820;--border:#252730;--accent:#F0C040;--accent2:#4DBAFF;--red:#FF5757;--green:#3DD68C;--muted:#6B7280;--text:#F0F1F4}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;font-size:13px;max-width:780px;margin:0 auto;padding:16px 14px 40px}
+h1{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:3px}
+.sub{color:var(--muted);font-size:11px;margin-bottom:14px}
+.rule-chip{display:inline-flex;align-items:center;gap:6px;background:#1C1E28;border:1px solid var(--border);border-left:3px solid var(--accent);padding:7px 12px;border-radius:6px;font-size:11px;color:var(--accent);margin-bottom:14px}
+.balance-bar{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:14px}
+.balance-bar .row{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.bal-item .lbl{font-size:10px;color:var(--muted);margin-bottom:3px}
+.bal-item .val{font-family:'Syne',sans-serif;font-size:15px;font-weight:700}
+.toggle-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.tgl{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'DM Mono',monospace;font-size:11px;cursor:pointer}
+.tgl.on{background:var(--accent);color:#000;border-color:var(--accent);font-weight:500}
+.dot-g{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:4px}
+.dot-b{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent2);margin-right:4px}
+.dot-o{display:inline-block;width:7px;height:7px;border-radius:50%;background:#FF9A3C;margin-right:4px}
+.dot-y{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-right:4px}
+.year-nav{display:flex;gap:8px;margin-bottom:14px}
+.yr-btn{padding:5px 18px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'DM Mono',monospace;font-size:12px;cursor:pointer}
+.yr-btn.active{background:#1C1E28;border-color:var(--accent2);color:var(--accent2);font-weight:600}
+.mes-section{margin-bottom:14px}
+.mes-header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--surface);border:1px solid var(--border);border-radius:10px 10px 0 0;border-bottom:none}
+.mes-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:800}
+.mes-total{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--accent)}
+.mes-sub{font-size:10px;color:var(--muted)}
+.table-wrap{border:1px solid var(--border);border-radius:0 0 10px 10px;overflow:hidden}
+table{width:100%;border-collapse:collapse}
+thead tr{background:#1A1C25}
+th{padding:7px 12px;text-align:left;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+th:last-child{text-align:right}
+tbody tr{border-top:1px solid var(--border);background:var(--surface)}
+tbody tr:hover{background:#1A1C25}
+td{padding:8px 12px;vertical-align:middle}
+td:last-child{text-align:right}
+.desc{font-size:12px}
+.badge{display:inline-block;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:500}
+.b-msi{background:#1C2A1A;color:var(--green);border:1px solid #2A4A28}
+.b-fijo{background:#1A1C28;color:var(--accent2);border:1px solid #252A40}
+.b-nuevo{background:#2A1C10;color:#FF9A3C;border:1px solid #4A3010}
+.b-coche{background:#1C1A28;color:var(--accent);border:1px solid #3A3050}
+.cuota{color:var(--muted);font-size:10px}
+.amount{font-family:'Syne',sans-serif;font-size:13px;font-weight:700}
+.cr{color:var(--red)}.cy{color:var(--accent)}.cb{color:var(--accent2)}.co{color:#FF9A3C}
+.subtot-row td{background:#12131A;font-size:11px;color:var(--muted);padding:7px 12px}
+.subtot-row td:last-child{color:var(--accent);font-family:'Syne',sans-serif;font-weight:700;font-size:13px}
+.res-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.res-card{background:#12131A;border-radius:8px;padding:10px;text-align:center}
+.res-card .m{font-size:10px;color:var(--muted);margin-bottom:4px}
+.res-card .v{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--accent)}
+.nota{font-size:10px;color:var(--muted);margin-top:14px;line-height:1.7;border-top:1px solid var(--border);padding-top:12px}
+.nota span{color:var(--accent)}
+@media(max-width:420px){.res-grid{grid-template-columns:repeat(2,1fr)}.balance-bar .row{flex-direction:column}}
+</style>
+</head>
+<body>
+<h1>Esquema de Pagos <span style="color:var(--accent)">General</span></h1>
+<div class="sub">Jose Laniado · Todos los compromisos de pago · MSI + Gastos Fijos + Créditos</div>
+<div class="rule-chip">⚡ REGLA Amex: Toda compra ≥$6,000 MXN o moneda extranjera → 3 MSI automáticos</div>
+
+<div class="balance-bar">
+  <div style="font-size:10px;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px">Última actualización: Mayo 2026</div>
+  <div class="row">
+    <div class="bal-item"><div class="lbl">Amex Platinum — Saldo corte 16-may</div><div class="val" style="color:var(--red)">$249,749</div></div>
+    <div class="bal-item"><div class="lbl">Amex Platinum — Pago junio</div><div class="val" style="color:var(--green);font-size:12px">✓ Pagado 5-jun-2026 · $42,503</div></div>
+    <div class="bal-item"><div class="lbl">Amex Gold — Saldo corte 13-may</div><div class="val" style="color:var(--red)">$23,305</div></div>
+    <div class="bal-item"><div class="lbl">Amex Gold — Pago mayo</div><div class="val" style="color:var(--green);font-size:12px">✓ Pagado 26-may-2026</div></div>
+    <div class="bal-item"><div class="lbl">Banamex Explora *3204 — Saldo corte 18-may</div><div class="val" style="color:var(--red)">$14,091</div></div>
+    <div class="bal-item"><div class="lbl">Banamex Explora — Pago junio</div><div class="val" style="color:var(--green);font-size:12px">✓ Pagado 8-jun-2026 · $14,091</div></div>
+  </div>
+</div>
+
+<div class="toggle-row">
+  <button class="tgl on" onclick="toggle('msi',this)"><span class="dot-g"></span>MSI Tarjetas</button>
+  <button class="tgl on" onclick="toggle('fijo',this)"><span class="dot-b"></span>Gastos fijos</button>
+  <button class="tgl on" onclick="toggle('nuevo',this)"><span class="dot-o"></span>Nuevos MSI</button>
+  <button class="tgl on" onclick="toggle('coche',this)"><span class="dot-y"></span>Coche</button>
+</div>
+
+<div class="year-nav">
+  <button class="yr-btn active" onclick="showYear(2026,this)">2026</button>
+  <button class="yr-btn" onclick="showYear(2027,this)">2027</button>
+</div>
+
+<div id="container"></div>
+<div id="resumen"></div>
+
+<div class="nota">
+  <div style="margin-bottom:4px"><span class="dot-g"></span>Verde = MSI existentes de estados de cuenta</div>
+  <div style="margin-bottom:4px"><span class="dot-o"></span>Naranja = Nuevos MSI automáticos (compras ≥$6k o moneda extranjera) + Bupa</div>
+  <div style="margin-bottom:4px"><span class="dot-y"></span>Amarillo = Crédito Coche N · $13,900/mes · termina <span>Nov 2027</span></div>
+  <div style="margin-bottom:4px"><span class="dot-b"></span>Azul = Gastos fijos recurrentes (Casa, Esposa, Servicios, Predial)</div>
+  <div style="margin-top:8px">💳 <span>Tarjetas:</span> Amex Platinum (corte 16) + Amex Gold (corte 13) + Banamex Explora (pendiente)</div>
+  <div style="margin-top:4px">⚠ Bupa: Cada pago trimestral se divide automáticamente en 3 MSI por ser ≥$6k</div>
+  <div style="margin-top:4px">⚠ Samsung TV 65": termina <span>Abr 2027</span> · $1,199.96/mes</div>
+</div>
+
+<script>
+const NM=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+const show={msi:true,fijo:true,nuevo:true,coche:true};
+let anioActual=2026;
+
+function fmt(n){return'$'+Math.round(n).toLocaleString('es-MX')}
+
+function getItems(anio,mes){
+  const ym=anio*100+mes;
+  const items=[];
+
+  // Samsung TV 65": cuota 1=Nov25, 18=Abr27
+  const sc=(anio*100+mes)-(2025*100+11)+1;
+  if(sc>=1&&sc<=18){const u=sc===18;items.push({t:'msi',d:`Samsung TV 65" (orig $21,599)`,c:`${sc}/18${u?' → último':''}`,m:1199.96,u});}
+
+  // Amazon MSI 12c: cuota 1=Jul25, 12=Jun26
+  const ac=(anio*100+mes)-(2025*100+7)+1;
+  if(ac>=1&&ac<=12){const u=ac===12;items.push({t:'msi',d:'Amazon MSI (orig $6,250)',c:`${ac}/12${u?' → último':''}`,m:520.83,u});}
+
+  // Salomón MX (Amex Gold) 3 MSI: cuota 1=Abr26, 3=Jun26
+  const solc=ym-(2026*100+4)+1;
+  if(solc>=1&&solc<=3){const u=solc===3;items.push({t:'msi',d:'Salomón MX ($4,199 · Amex Gold)',c:`${solc}/3${u?' → último':''}`,m:1399.77,u});}
+
+  // Ben & Frank (Amex Gold) 3 MSI: cuota 1=Abr26, 3=Jun26
+  const bfc=ym-(2026*100+4)+1;
+  if(bfc>=1&&bfc<=3){const u=bfc===3;items.push({t:'msi',d:'Ben & Frank ($2,190 · Amex Gold)',c:`${bfc}/3${u?' → último':''}`,m:730.00,u});}
+
+  // Ulta Beauty Antara (Amex Gold) 6 MSI: cuota 1=Abr26, 6=Sep26
+  const ultac=ym-(2026*100+4)+1;
+  if(ultac>=1&&ultac<=6){const u=ultac===6;items.push({t:'msi',d:'Ulta Beauty Antara ($4,135 · Amex Gold)',c:`${ultac}/6${u?' → último':''}`,m:689.17,u});}
+
+  // Mercado Libre (Amex Gold) 3 MSI: cuota 1=Abr26, 3=Jun26
+  const mlc=ym-(2026*100+4)+1;
+  if(mlc>=1&&mlc<=3){const u=mlc===3;items.push({t:'msi',d:'Mercado Libre ($1,499 · Amex Gold)',c:`${mlc}/3${u?' → último':''}`,m:499.67,u});}
+
+  // Plan $42,790: cuota 3/3 = May-26 SÓLO
+  if(ym===2026*100+5)items.push({t:'msi',d:'Plan $42,790',c:'3/3 → último',m:14263.17,u:true});
+  // Plan $25,301: 2/3=May, 3/3=Jun
+  if(ym===2026*100+5)items.push({t:'msi',d:'Plan $25,301',c:'2/3',m:8433.53,u:false});
+  if(ym===2026*100+6)items.push({t:'msi',d:'Plan $25,301',c:'3/3 → último',m:8433.53,u:true});
+  // Extranjero $110: 2/3=May, 3/3=Jun
+  if(ym===2026*100+5)items.push({t:'msi',d:'Oura Ring - Suscripción Raquel ($110 USD)',c:'2/3',m:36.53,u:false});
+  if(ym===2026*100+6)items.push({t:'msi',d:'Oura Ring - Suscripción Raquel ($110 USD)',c:'3/3 → último',m:36.53,u:true});
+
+  // Samsung Galaxy Z Fold 7 ($36,799) - 3 MSI automáticos Amex Platinum - May, Jun, Jul 2026
+  const fold7c=ym-(2026*100+5)+1;
+  if(fold7c>=1&&fold7c<=3){const u=fold7c===3;items.push({t:'nuevo',d:'Samsung Galaxy Z Fold 7 Negro 512GB ($36,799)',c:`${fold7c}/3${u?' → último':''}`,m:12266.33,u});}
+  // Hotel The Lombardy NYC ($25,849 · MasterCard *9618) 9 MSI: cuota 1=Jun26, 9=Feb27
+  const hotelNYCC=ym-(2026*100+6)+1;
+  if(hotelNYCC>=1&&hotelNYCC<=9){const u=hotelNYCC===9;items.push({t:'nuevo',d:'Hotel The Lombardy NYC ($25,849 · MC *9618)',c:`${hotelNYCC}/9${u?' → último':''}`,m:hotelNYCC===9?2872.12:2872.11,u});}
+
+  // Amazon Electrónicos ($4,899 · Amex Platinum) 6 MSI: cuota 1=Jun26, 6=Nov26
+  const amazElecC=ym-(2026*100+6)+1;
+  if(amazElecC>=1&&amazElecC<=6){const u=amazElecC===6;items.push({t:'nuevo',d:'Amazon Electrónicos ($4,899 · Amex Platinum)',c:`${amazElecC}/6${u?' → último':''}`,m:816.50,u});}
+
+  // Nuevos MSI x4: inician May-26
+  const nuevos=[
+    {d:'Zurich Seguros Casa ($10,062)',m:3353.86},
+    {d:'Lululemon ($8,740)',m:2913.33},
+    {d:'Amazon $6,499',m:2166.33},
+    {d:'Shohop ($9,131)',m:3043.67}
+  ];
+  nuevos.forEach(n=>{
+    const c=ym-(2026*100+5)+1;
+    if(c>=1&&c<=3){const u=c===3;items.push({t:'nuevo',d:n.d,c:`${c}/3${u?' → último':''}`,m:n.m,u});}
+  });
+
+  // Bupa Jose — Póliza propia ($20,350.75 · Amex Platinum · cargo 29-abr) — 3 MSI: May, Jun, Jul 2026
+  if(ym===2026*100+5)items.push({t:'nuevo',d:'Bupa Jose · Póliza propia ($20,350.75)',c:'1/3',m:6783.58,u:false});
+  if(ym===2026*100+6)items.push({t:'nuevo',d:'Bupa Jose · Póliza propia ($20,350.75)',c:'2/3',m:6783.58,u:false});
+  if(ym===2026*100+7)items.push({t:'nuevo',d:'Bupa Jose · Póliza propia ($20,350.75)',c:'3/3 → último',m:6783.59,u:true});
+
+  // Bupa MSI (4 pagos trimestrales, cada uno dividido en 3 MSI)
+  // Pago 1/4: Jun, Jul, Ago 2026 — pago real: $51,037.75 (27-May-2026 · Amex ***3004)
+  if(ym===2026*100+6)items.push({t:'nuevo',d:'Bupa Pago 1/4 ($51,037.75)',c:'1/3',m:17012.58,u:false});
+  if(ym===2026*100+7)items.push({t:'nuevo',d:'Bupa Pago 1/4 ($51,037.75)',c:'2/3',m:17012.58,u:false});
+  if(ym===2026*100+8)items.push({t:'nuevo',d:'Bupa Pago 1/4 ($51,037.75)',c:'3/3 → último',m:17012.59,u:true});
+  // Pago 2/4: Ago, Sep, Oct 2026
+  if(ym===2026*100+8)items.push({t:'nuevo',d:'Bupa Pago 2/4 ($19,263.25)',c:'1/3',m:6421.08,u:false});
+  if(ym===2026*100+9)items.push({t:'nuevo',d:'Bupa Pago 2/4 ($19,263.25)',c:'2/3',m:6421.08,u:false});
+  if(ym===2026*100+10)items.push({t:'nuevo',d:'Bupa Pago 2/4 ($19,263.25)',c:'3/3 → último',m:6421.09,u:true});
+  // Pago 3/4: Nov, Dic 2026, Ene 2027
+  if(ym===2026*100+11)items.push({t:'nuevo',d:'Bupa Pago 3/4 ($19,263.25)',c:'1/3',m:6421.08,u:false});
+  if(ym===2026*100+12)items.push({t:'nuevo',d:'Bupa Pago 3/4 ($19,263.25)',c:'2/3',m:6421.08,u:false});
+  if(ym===2027*100+1)items.push({t:'nuevo',d:'Bupa Pago 3/4 ($19,263.25)',c:'3/3 → último',m:6421.09,u:true});
+  // Pago 4/4: Feb, Mar, Abr 2027
+  if(ym===2027*100+2)items.push({t:'nuevo',d:'Bupa Pago 4/4 ($19,263.25)',c:'1/3',m:6421.08,u:false});
+  if(ym===2027*100+3)items.push({t:'nuevo',d:'Bupa Pago 4/4 ($19,263.25)',c:'2/3',m:6421.08,u:false});
+  if(ym===2027*100+4)items.push({t:'nuevo',d:'Bupa Pago 4/4 ($19,263.25)',c:'3/3 → último',m:6421.09,u:true});
+
+  // Amazon Banamex Explora *3204 — 24 MSI ($6,514.67): cuota 1=Jul25, 24=Jun27
+  const amzBanamexC=ym-(2025*100+7)+1;
+  if(amzBanamexC>=1&&amzBanamexC<=24){const u=amzBanamexC===24;items.push({t:'msi',d:'Amazon Banamex Explora ($6,514.67 · 24 MSI)',c:`${amzBanamexC}/24${u?' → último':''}`,m:271.44,u});}
+
+  // Gastos fijos
+  items.push({t:'fijo',d:'Tarjeta Palacio *5731',c:'mensual · pago día 6',m:6645.18,u:false});
+  items.push({t:'fijo',d:'Banamex Explora *3204',c:'mensual · vence día 8 · monto variable',m:14090.75,u:false});
+  items.push({t:'fijo',d:'Muchacha entrada/salida (Lun y Jue)',c:'mensual',m:4000,u:false});
+  items.push({t:'fijo',d:'Mantenimiento Casa',c:'mensual',m:12694,u:false});
+  items.push({t:'fijo',d:'Esposa Raquel',c:'mensual',m:15000,u:false});
+  items.push({t:'fijo',d:'AT&T + Telmex + Sheep',c:'mensual',m:1532,u:false});
+  items.push({t:'fijo',d:'CFE Luz — Casa',c:'mensual · monto variable · últ. $207',m:207,u:false});
+  items.push({t:'fijo',d:'Royal Gas LP — Casa',c:'mensual · monto variable · últ. $903',m:903,u:false});
+  items.push({t:'fijo',d:'Cargador Coche Eléctrico',c:'mensual · estimado',m:500,u:false});
+  if(anio===2026&&mes===1)items.push({t:'fijo',d:'Predial',c:'anual',m:8143,u:false});
+
+  // Coche: Dic25 a Nov27 = 24 cuotas
+  if(ym>=2025*100+12&&ym<=2027*100+11){
+    const c=ym-(2025*100+12)+1;const u=c===24;
+    items.push({t:'coche',d:'Coche N (Crédito)',c:`${c}/24${u?' → último':''}`,m:13900,u});
+  }
+
+  return items;
+}
+
+function colorClass(t,u){
+  if(t==='fijo')return'cb';
+  if(t==='coche')return u?'cr':'cy';
+  if(t==='nuevo')return u?'cr':'co';
+  return u?'cr':'cy';
+}
+function badge(t){
+  if(t==='msi')return'<span class="badge b-msi">MSI</span>';
+  if(t==='fijo')return'<span class="badge b-fijo">FIJO</span>';
+  if(t==='nuevo')return'<span class="badge b-nuevo">NUEVO MSI</span>';
+  return'<span class="badge b-coche">COCHE</span>';
+}
+
+function renderYear(anio){
+  const container=document.getElementById('container');
+  container.innerHTML='';
+  const meses=anio===2026?[6,7,8,9,10,11,12]:[1,2,3,4,5,6,7,8,9,10,11];
+
+  meses.forEach(mes=>{
+    const items=getItems(anio,mes);
+    const total=items.filter(i=>show[i.t]).reduce((s,i)=>s+i.m,0);
+    const sigMes=mes===12?1:mes+1;
+    const sigAnio=mes===12?anio+1:anio;
+    let rows=items.map(i=>`
+      <tr class="row-${i.t}" ${show[i.t]?'':'style="display:none"'}>
+        <td class="desc">${i.d}${i.u?' <span style="color:var(--green)">✓</span>':''}</td>
+        <td>${badge(i.t)}</td>
+        <td class="cuota">${i.c}</td>
+        <td class="amount ${colorClass(i.t,i.u)}">${fmt(i.m)}</td>
+      </tr>`).join('');
+
+    const sec=document.createElement('div');
+    sec.className='mes-section';
+    sec.innerHTML=`
+      <div class="mes-header">
+        <div><div class="mes-title">${NM[mes-1]} ${anio}</div><div class="mes-sub">Pago antes del 6 de ${NM[sigMes-1]} ${sigAnio}</div></div>
+        <div style="text-align:right"><div class="mes-total" id="t-${anio}-${mes}">${fmt(total)}</div><div class="mes-sub">total a pagar</div></div>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Concepto</th><th>Tipo</th><th>Cuota</th><th style="text-align:right">Monto</th></tr></thead>
+        <tbody>${rows}</tbody>
+        <tfoot><tr class="subtot-row"><td colspan="3">Total ${NM[mes-1]} ${anio}</td><td id="s-${anio}-${mes}">${fmt(total)}</td></tr></tfoot>
+      </table></div>`;
+    container.appendChild(sec);
+  });
+
+  renderRes(anio,meses);
+}
+
+function renderRes(anio,meses){
+  const cards=meses.map(mes=>{
+    const t=getItems(anio,mes).filter(i=>show[i.t]).reduce((s,i)=>s+i.m,0);
+    return`<div class="res-card"><div class="m">${NM[mes-1].slice(0,3)}</div><div class="v">${fmt(t)}</div></div>`;
+  }).join('');
+  document.getElementById('resumen').innerHTML=`
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-top:8px">
+      <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Resumen ${anio}</div>
+      <div class="res-grid">${cards}</div>
+    </div>`;
+}
+
+function recalc(){
+  const meses=anioActual===2026?[6,7,8,9,10,11,12]:[1,2,3,4,5,6,7,8,9,10,11];
+  meses.forEach(mes=>{
+    const t=getItems(anioActual,mes).filter(i=>show[i.t]).reduce((s,i)=>s+i.m,0);
+    const e1=document.getElementById(`t-${anioActual}-${mes}`);
+    const e2=document.getElementById(`s-${anioActual}-${mes}`);
+    if(e1)e1.textContent=fmt(t);
+    if(e2)e2.textContent=fmt(t);
+  });
+  renderRes(anioActual,meses);
+}
+
+function toggle(cat,btn){
+  show[cat]=!show[cat];
+  btn.classList.toggle('on',show[cat]);
+  document.querySelectorAll('.row-'+cat).forEach(r=>r.style.display=show[cat]?'':'none');
+  recalc();
+}
+
+function showYear(anio,btn){
+  anioActual=anio;
+  document.querySelectorAll('.yr-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderYear(anio);
+}
+
+renderYear(2026);
+</script>
+</body>
+</html>
