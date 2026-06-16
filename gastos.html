@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gastos Personales — Jose Laniado</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f5f5f5;color:#222;max-width:680px;margin:0 auto;padding:12px}
+h2{font-size:18px;font-weight:600;margin-bottom:2px}
+.sub{font-size:12px;color:#888;margin-bottom:14px}
+.badge{display:inline-block;background:#E6F1FB;color:#0C447C;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;margin-left:8px;vertical-align:middle}
+.meses{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px}
+.mes-btn{padding:4px 10px;font-size:12px;border-radius:20px;border:1px solid #ccc;background:transparent;cursor:pointer;color:#555}
+.mes-btn.active{background:#E6F1FB;border-color:#2E75B6;color:#0C447C;font-weight:600}
+.metricas{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.metrica{border-radius:8px;padding:10px 12px}
+.metrica .lbl{font-size:11px;margin-bottom:3px}
+.metrica .val{font-size:14px;font-weight:600}
+.ing{background:#E1F5EE;color:#0F6E56}
+.gas{background:#FCEBEB;color:#A32D2D}
+.aho{background:#EEEDFE;color:#3C3489}
+.sal-pos{background:#E1F5EE;color:#0F6E56}
+.sal-neg{background:#FCEBEB;color:#A32D2D}
+.tabs{display:flex;gap:6px;margin-bottom:14px;border-bottom:1px solid #e0e0e0;padding-bottom:8px}
+.tab{padding:6px 14px;font-size:13px;border-radius:8px;border:1px solid #ddd;background:transparent;cursor:pointer;color:#555}
+.tab.active{background:#f0f0f0;border-color:#aaa;color:#222;font-weight:600}
+.card{background:#fff;border:1px solid #e0e0e0;border-radius:12px;padding:14px;margin-bottom:8px}
+.card-title{font-size:13px;font-weight:600;margin-bottom:12px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.form-full{margin-bottom:10px}
+label{font-size:11px;color:#888;display:block;margin-bottom:4px}
+input,select{width:100%;padding:8px 10px;border-radius:8px;border:1px solid #ddd;font-size:13px;background:#fff;color:#222}
+input:focus,select:focus{outline:2px solid #2E75B6;border-color:#2E75B6}
+.btn-primary{flex:1;padding:10px;border-radius:8px;border:none;background:#2E75B6;color:#fff;font-size:13px;font-weight:600;cursor:pointer}
+.btn-primary:hover{background:#1F5C8A}
+.btn-cancel{padding:10px 16px;border-radius:8px;border:1px solid #ddd;background:transparent;font-size:13px;cursor:pointer;color:#888}
+.mov-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border:1px solid #e8e8e8;border-radius:10px;margin-bottom:6px}
+.dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.mov-info{flex:1;min-width:0}
+.mov-cat{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mov-fecha{font-size:11px;color:#888}
+.mov-monto{font-size:13px;font-weight:600;flex-shrink:0}
+.mov-acciones{display:flex;gap:4px;flex-shrink:0}
+.btn-sm{padding:3px 8px;font-size:11px;border-radius:6px;border:1px solid #ddd;background:transparent;cursor:pointer}
+.bar-row{margin-bottom:12px}
+.bar-label{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px}
+.bar-track{background:#eee;border-radius:4px;height:7px;overflow:hidden}
+.bar-fill{height:7px;border-radius:4px;background:#2E75B6}
+.resumen-box{background:#f7f7f7;border-radius:10px;padding:12px 14px;margin-top:14px}
+.res-row{display:flex;justify-content:space-between;font-size:13px;margin-bottom:7px}
+.res-row:last-child{margin-bottom:0;border-top:1px solid #e0e0e0;padding-top:8px;font-weight:600;font-size:14px}
+.empty{text-align:center;padding:2rem;color:#aaa;font-size:13px}
+.footer{text-align:center;font-size:11px;color:#bbb;margin-top:14px}
+.cat-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border:1px solid #e8e8e8;border-radius:10px;margin-bottom:6px}
+.cat-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.cat-info{flex:1;min-width:0}
+.cat-nombre{font-size:12px;font-weight:600;margin-bottom:3px}
+.cat-bar-track{background:#eee;border-radius:4px;height:5px;overflow:hidden}
+.cat-bar-fill{height:5px;border-radius:4px}
+.cat-right{text-align:right;flex-shrink:0}
+.cat-monto{font-size:13px;font-weight:700;color:#A32D2D}
+.cat-pct{font-size:10px;color:#888;margin-top:1px}
+.cat-grupo{font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.6px;padding:12px 4px 4px;margin-top:4px}
+.cat-total-row{display:flex;justify-content:space-between;background:#f7f7f7;border-radius:10px;padding:12px 14px;margin-top:8px;font-weight:700;font-size:14px}
+.mes-progress{background:#fff;border:1px solid #e8e8e8;border-radius:10px;padding:10px 14px;margin-bottom:12px}
+.mes-progress-header{display:flex;justify-content:space-between;font-size:11px;color:#888;margin-bottom:6px}
+.mes-progress-header span:last-child{font-weight:600;color:#222}
+.mes-progress-track{background:#eee;border-radius:6px;height:8px;overflow:hidden}
+.mes-progress-fill{height:8px;border-radius:6px;background:linear-gradient(90deg,#2E75B6,#5BA3D9);transition:width .3s}
+.anio-row{display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap}
+.anio-btn{padding:4px 12px;font-size:12px;border-radius:20px;border:1px solid #ccc;background:transparent;cursor:pointer;color:#555}
+.anio-btn.active{background:#E6F1FB;border-color:#2E75B6;color:#0C447C;font-weight:600}
+.btn-row{display:flex;gap:8px}
+.notif{position:fixed;top:16px;right:16px;background:#1D9E75;color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:999}
+.notif.show{opacity:1}
+.optgroup-sep{font-weight:700;color:#555;font-size:11px}
+@media(max-width:400px){.metricas{grid-template-columns:repeat(2,1fr)}.form-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="notif" id="notif">Guardado</div>
+<h2>Gastos Personales <span class="badge">Personal</span></h2>
+<div class="sub">Jose Laniado · <span id="anio"></span> — Solo gastos personales, sin obra</div>
+<div class="anio-row" id="anios"></div>
+<div class="meses" id="meses"></div>
+<div class="mes-progress" id="mes-progress-box">
+  <div class="mes-progress-header">
+    <span id="prog-label">Progreso del mes</span>
+    <span id="prog-dias"></span>
+  </div>
+  <div class="mes-progress-track"><div class="mes-progress-fill" id="prog-fill" style="width:0%"></div></div>
+</div>
+<div class="metricas">
+  <div class="metrica ing"><div class="lbl">Ingresos</div><div class="val" id="m-ing">$0</div></div>
+  <div class="metrica gas"><div class="lbl">Gastos</div><div class="val" id="m-gas">$0</div></div>
+  <div class="metrica aho"><div class="lbl">Ahorro</div><div class="val" id="m-aho">$0</div></div>
+  <div class="metrica sal-pos" id="m-sal-card"><div class="lbl">Saldo</div><div class="val" id="m-sal">$0</div></div>
+</div>
+<div class="tabs">
+  <button class="tab active" onclick="setTab('registrar')">Registrar</button>
+  <button class="tab" onclick="setTab('movimientos')">Movimientos</button>
+  <button class="tab" onclick="setTab('categorias')">Categorías</button>
+  <button class="tab" onclick="setTab('resumen')">Resumen</button>
+</div>
+
+<div id="tab-registrar">
+  <div class="card">
+    <div class="card-title" id="form-title">Nuevo movimiento</div>
+    <div class="form-row">
+      <div><label>Fecha</label><input type="date" id="f-fecha"></div>
+      <div><label>Tipo</label>
+        <select id="f-tipo">
+          <option>Gasto</option><option>Ingreso</option><option>Ahorro</option><option>Deuda-Pago</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div><label>Categoría</label><select id="f-cat"></select></div>
+      <div><label>Monto ($)</label><input type="number" id="f-monto" placeholder="0" min="0"></div>
+    </div>
+    <div class="form-full"><label>Detalle / Nota (opcional)</label><input type="text" id="f-detalle" placeholder="Ej. Walmart, gasolina, deducible..."></div>
+    <div class="btn-row">
+      <button class="btn-primary" onclick="guardar()" id="btn-guardar">+ Agregar</button>
+      <button class="btn-cancel" onclick="cancelarEdicion()" id="btn-cancel" style="display:none">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div id="tab-movimientos" style="display:none"><div id="lista-movs"></div></div>
+
+<div id="tab-categorias" style="display:none"><div id="lista-cats"></div></div>
+
+<div id="tab-resumen" style="display:none">
+  <div class="card">
+    <div class="card-title" id="res-titulo">Top gastos</div>
+    <div id="barras"></div>
+    <div class="resumen-box">
+      <div class="res-row"><span style="color:#888">Total ingresos</span><span style="color:#0F6E56" id="r-ing">$0</span></div>
+      <div class="res-row"><span style="color:#888">Total gastos</span><span style="color:#A32D2D" id="r-gas">$0</span></div>
+      <div class="res-row"><span style="color:#888">Total ahorro</span><span style="color:#3C3489" id="r-aho">$0</span></div>
+      <div class="res-row"><span>Saldo del mes</span><span id="r-sal">$0</span></div>
+    </div>
+  </div>
+</div>
+<div class="footer" id="footer-count">0 movimientos</div>
+
+<script>
+const MESES=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+const GRUPOS=[
+  {g:"INGRESOS",cats:["EMPLEO / INGRESO","RENDIMIENTO MIFEL","REGALO / BONO"]},
+  {g:"CASA",cats:["MTTO CASA (mantenimiento)","AGUA","LUZ","GAS","MUCHACHA (Maribel)","ESPOSA (Raquel)","GASTOS CASA Samsung","PREDIAL","CUOTA EXTRAORDINARIA"]},
+  {g:"COMUNICACIONES",cats:["TELEMEX / Internet","AT&T TELÉFONO"]},
+  {g:"SEGUROS",cats:["SEGURO MÉDICO (Raquel)","SEGURO COCHES","SEGURO CASA","SEGURO BUPA (tuyo)","DEDUCIBLE MÉDICO"]},
+  {g:"TRANSPORTE",cats:["COCHE N (CRÉDITO)","GASOLINA / VIATICOS","TENENCIA COCHES","CASETAS","MANTENIMIENTO COCHES","UBER / TAXI"]},
+  {g:"CRÉDITOS Y PAGOS",cats:["PALACIO DE HIERRO","TARJETA AMEX GOLD","TARJETA BANAMEX EXPLORA"]},
+  {g:"FISCAL",cats:["SAT / CONTABILIDAD (SHEEP)","ISR MENSUAL","IVA"]},
+  {g:"MAASER / TZEDAKÁ",cats:["MAASER (10%)","DONATIVO / TZEDAKÁ","SINAGOGA / RELIGIOSO"]},
+  {g:"ANUALIDADES Y SUSCRIPCIONES",cats:["AMEX GOLD (anualidad)","BANAMEX EXPLORA (anualidad)","GOOGLE ONE","MICROSOFT OFFICE 365","AMAZON PRIME","ONE PASSWORD","SHEEP (anualidad)","CUE","GAMMA","SAMSUNG (suscripción)","APPLE","F1 TV","AUDIBLE","POP TV","CLAUDE","BLINK"]},
+  {g:"SALUD",cats:["DOCTORES","FARMACIA","LABORATORIOS","DENTAL","HOSPITAL"]},
+  {g:"ALIMENTACIÓN Y ENTRETENIMIENTO",cats:["RESTAURANTE","RAPPI / UBER EATS","SUPER / DESPENSA","SALIDAS / OCIO"]},
+  {g:"COMPRAS",cats:["AMAZON / MERCADO LIBRE","ROPA / ZARA","OTROS COMERCIOS"]},
+  {g:"AHORRO E INVERSIÓN",cats:["MAASER (fondo separado)","AHORRO GENERAL","CETES / INVERSIÓN"]},
+  {g:"VIAJES",cats:["VUELOS","HOTEL","RENTA DE COCHE","VIÁTICOS VIAJE","VIAJES VARIOS"]},{g:"OTROS",cats:["DENTISTA","CURSOS / EDUCACIÓN","REGALOS","GASTOS VARIOS","OTROS"]}
+];
+
+let gastos=JSON.parse(localStorage.getItem("gp_jose_v3")||"[]");
+// Migración: Estado de Cuenta Amex Gold · corte 13 May 2026
+(function(){
+  const KEY="gp_jose_migr_gold_may2026_v3";
+  if(localStorage.getItem(KEY))return;
+  // Borrar migración anterior de Anthropic para evitar duplicado
+  localStorage.removeItem("gp_jose_migr_anthropic_may2026");
+  const BASE_ID=1900000000000;
+  const entradas=[
+    {i:0, fecha:"2026-04-14",tipo:"Gasto",categoria:"ROPA / ZARA",detalle:"Daniel Wellington MSI 6/6 · Amex Gold",monto:816.50},
+    {i:1, fecha:"2026-04-14",tipo:"Gasto",categoria:"ROPA / ZARA",detalle:"Salomón MX MSI 2/3 · Amex Gold",monto:1399.77},
+    {i:2, fecha:"2026-04-14",tipo:"Gasto",categoria:"ROPA / ZARA",detalle:"Ben & Frank MSI 2/3 · Amex Gold",monto:730.00},
+    {i:3, fecha:"2026-04-14",tipo:"Gasto",categoria:"OTROS COMERCIOS",detalle:"Ulta Beauty Antara MSI 2/6 · Amex Gold",monto:689.17},
+    {i:4, fecha:"2026-04-14",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Mercado Libre MSI 2/3 · Amex Gold",monto:499.67},
+    {i:5, fecha:"2026-04-15",tipo:"Gasto",categoria:"UBER / TAXI",detalle:"DriveApp · Amex Gold",monto:28.60},
+    {i:6, fecha:"2026-04-19",tipo:"Gasto",categoria:"SUPER / DESPENSA",detalle:"La Comer · Amex Gold",monto:1038.10},
+    {i:7, fecha:"2026-04-19",tipo:"Gasto",categoria:"SALIDAS / OCIO",detalle:"Aztlan Parque Urbano · Amex Gold",monto:115.00},
+    {i:8, fecha:"2026-04-19",tipo:"Gasto",categoria:"RESTAURANTE",detalle:"Rest. Distribuidora Oak · Amex Gold",monto:175.00},
+    {i:9, fecha:"2026-04-22",tipo:"Gasto",categoria:"LUZ",detalle:"CFE · Amex Gold",monto:207.00},
+    {i:10,fecha:"2026-04-23",tipo:"Gasto",categoria:"UBER / TAXI",detalle:"DriveApp · Amex Gold",monto:28.60},
+    {i:11,fecha:"2026-04-23",tipo:"Gasto",categoria:"OTROS COMERCIOS",detalle:"Tint Bosques · Amex Gold",monto:531.60},
+    {i:12,fecha:"2026-04-23",tipo:"Gasto",categoria:"RESTAURANTE",detalle:"Yakkumi · Amex Gold",monto:998.20},
+    {i:13,fecha:"2026-04-26",tipo:"Gasto",categoria:"RESTAURANTE",detalle:"Bistro Isabel · Amex Gold",monto:1621.50},
+    {i:14,fecha:"2026-04-26",tipo:"Gasto",categoria:"RESTAURANTE",detalle:"Focaccia Mama · Amex Gold",monto:75.00},
+    {i:15,fecha:"2026-04-29",tipo:"Gasto",categoria:"AT&T TELÉFONO",detalle:"AT&T · Amex Gold",monto:300.00},
+    {i:16,fecha:"2026-04-29",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Mercado Libre · Amex Gold",monto:349.00},
+    {i:17,fecha:"2026-04-30",tipo:"Gasto",categoria:"RESTAURANTE",detalle:"Yakkumi · Amex Gold",monto:2349.45},
+    {i:18,fecha:"2026-04-30",tipo:"Gasto",categoria:"SUPER / DESPENSA",detalle:"Fresko Avandaro · Amex Gold",monto:82.00},
+    {i:19,fecha:"2026-04-30",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Mercado Libre · Amex Gold",monto:349.00},
+    {i:20,fecha:"2026-05-03",tipo:"Gasto",categoria:"SUPER / DESPENSA",detalle:"Fresko Avandaro · Amex Gold",monto:153.40},
+    {i:21,fecha:"2026-05-03",tipo:"Gasto",categoria:"GASOLINA / VIATICOS",detalle:"Pits Tol Zit · Amex Gold",monto:269.00},
+    {i:22,fecha:"2026-05-04",tipo:"Gasto",categoria:"ROPA / ZARA",detalle:"Jersey Club · Amex Gold",monto:1796.00},
+    {i:23,fecha:"2026-05-06",tipo:"Gasto",categoria:"RESTAURANTE",detalle:"Sushi Itto Satélite · Amex Gold",monto:541.00},
+    {i:24,fecha:"2026-05-06",tipo:"Gasto",categoria:"RESTAURANTE",detalle:"Yakkumi · Amex Gold",monto:891.00},
+    {i:25,fecha:"2026-05-08",tipo:"Gasto",categoria:"GASOLINA / VIATICOS",detalle:"ABTS PQ Delta · Amex Gold",monto:272.00},
+    {i:26,fecha:"2026-05-09",tipo:"Gasto",categoria:"RESTAURANTE",detalle:"Yakkumi · Amex Gold",monto:869.40},
+    {i:27,fecha:"2026-05-12",tipo:"Gasto",categoria:"MTTO CASA (mantenimiento)",detalle:"Lavandería Romualda · Amex Gold",monto:396.00},
+    {i:28,fecha:"2026-05-13",tipo:"Gasto",categoria:"CLAUDE",detalle:"Anthropic · $45 USD · Amex Gold",monto:794.33},
+    {i:29,fecha:"2026-04-28",tipo:"Gasto",categoria:"ESPOSA (Raquel)",detalle:"Operadora de Servicios · Amex Gold",monto:1610.51},
+    {i:30,fecha:"2026-05-07",tipo:"Gasto",categoria:"ESPOSA (Raquel)",detalle:"Alo Yoga Antara · Amex Gold",monto:3870.00},
+    // Palacio de Hierro
+    {i:31,fecha:"2026-04-26",tipo:"Gasto",categoria:"OTROS COMERCIOS",detalle:"Blancos y Baño Interlomas · Palacio de Hierro (revolvente)",monto:8941.40},
+  ];
+  entradas.forEach(e=>{
+    const id=BASE_ID+e.i*1000;
+    if(!gastos.some(g=>g.id===id)){
+      gastos.push({id,fecha:e.fecha,tipo:e.tipo,categoria:e.categoria,detalle:e.detalle,monto:e.monto});
+    }
+  });
+  try{localStorage.setItem("gp_jose_v3",JSON.stringify(gastos));}catch{}
+  localStorage.setItem(KEY,"1");
+})();
+// Migración: Estado de Cuenta Amex Platinum · corte 16 May 2026
+(function(){
+  const KEY="gp_jose_migr_platinum_may2026_v1";
+  if(localStorage.getItem(KEY))return;
+  const BASE_ID=2000000000000;
+  const entradas=[
+    {i:0, fecha:"2026-04-17",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Amazon MX Marketplace · Amex Platinum",monto:373.99},
+    {i:1, fecha:"2026-04-17",tipo:"Gasto",categoria:"GASOLINA / VIATICOS",detalle:"Parco (parking) · Amex Platinum",monto:39.00},
+    {i:2, fecha:"2026-04-20",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Amazon MX Retail · Amex Platinum",monto:370.46},
+    {i:3, fecha:"2026-04-20",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Amazon MX Marketplace · Amex Platinum",monto:299.99},
+    {i:4, fecha:"2026-04-21",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Amazon MX Marketplace · Amex Platinum",monto:214.00},
+    {i:5, fecha:"2026-04-21",tipo:"Gasto",categoria:"AT&T TELÉFONO",detalle:"AT&T cargo recurrente · Amex Platinum",monto:579.00},
+    {i:6, fecha:"2026-04-21",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Amazon MX Retail · Amex Platinum",monto:174.90},
+    {i:7, fecha:"2026-04-21",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Amazon MX Marketplace · Amex Platinum",monto:1260.00},
+    {i:8, fecha:"2026-04-21",tipo:"Gasto",categoria:"UBER / TAXI",detalle:"Uber · Amex Platinum",monto:78.70},
+    {i:9, fecha:"2026-04-21",tipo:"Gasto",categoria:"UBER / TAXI",detalle:"Uber · Amex Platinum",monto:1529.47},
+    {i:10,fecha:"2026-04-22",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Amazon MX Marketplace · Amex Platinum",monto:169.00},
+    {i:11,fecha:"2026-04-22",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Amazon MX Marketplace · Amex Platinum",monto:3664.54},
+    {i:12,fecha:"2026-04-22",tipo:"Gasto",categoria:"RAPPI / UBER EATS",detalle:"Rappi · Amex Platinum",monto:245.38},
+    {i:13,fecha:"2026-04-23",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Amazon MX Marketplace · Amex Platinum",monto:852.01},
+    {i:14,fecha:"2026-04-23",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Amazon MX Retail · Amex Platinum",monto:368.39},
+    {i:15,fecha:"2026-04-23",tipo:"Gasto",categoria:"ESPOSA (Raquel)",detalle:"Ringana (cosmetics) · Amex Platinum",monto:2022.00},
+    {i:16,fecha:"2026-04-24",tipo:"Gasto",categoria:"RAPPI / UBER EATS",detalle:"Rappi · Amex Platinum",monto:787.00},
+    {i:17,fecha:"2026-04-25",tipo:"Gasto",categoria:"APPLE",detalle:"Apple.com suscripción · Amex Platinum",monto:49.00},
+    {i:18,fecha:"2026-04-26",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Amazon MX Marketplace · Amex Platinum",monto:3836.92},
+    {i:19,fecha:"2026-04-26",tipo:"Gasto",categoria:"GASOLINA / VIATICOS",detalle:"Parco (parking) · Amex Platinum",monto:90.00},
+    {i:20,fecha:"2026-04-26",tipo:"Gasto",categoria:"OTROS COMERCIOS",detalle:"Samsung Galaxy Z Fold 7 ($36,799 · MSI auto 3x) · Amex Platinum",monto:36799.20},
+    {i:21,fecha:"2026-04-27",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Amazon MX Marketplace · Amex Platinum",monto:1189.00},
+    {i:22,fecha:"2026-04-28",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Amazon MX Marketplace · Amex Platinum",monto:799.00},
+    {i:23,fecha:"2026-04-28",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Amazon MX Marketplace · Amex Platinum",monto:345.00},
+    {i:24,fecha:"2026-04-28",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Amazon MX Marketplace · Amex Platinum",monto:478.00},
+    {i:25,fecha:"2026-04-28",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Amazon MX Marketplace · Amex Platinum",monto:2566.82},
+    {i:26,fecha:"2026-04-29",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Amazon MX Marketplace · Amex Platinum",monto:594.99},
+    {i:27,fecha:"2026-04-29",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Amazon MX Marketplace · Amex Platinum",monto:369.00},
+    {i:28,fecha:"2026-04-29",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Amazon MX Marketplace · Amex Platinum",monto:2199.99},
+    {i:29,fecha:"2026-04-29",tipo:"Gasto",categoria:"UBER / TAXI",detalle:"Uber · Amex Platinum",monto:70.00},
+    {i:30,fecha:"2026-04-29",tipo:"Gasto",categoria:"SEGURO BUPA (tuyo)",detalle:"Bupa Mexico (póliza Jose sin maternidad) · Amex Platinum",monto:20350.75},
+    {i:31,fecha:"2026-04-29",tipo:"Gasto",categoria:"RAPPI / UBER EATS",detalle:"Rappi · Amex Platinum",monto:179.50},
+    {i:32,fecha:"2026-04-29",tipo:"Gasto",categoria:"RAPPI / UBER EATS",detalle:"Rappi Prime suscripción · Amex Platinum",monto:69.00},
+    {i:33,fecha:"2026-05-01",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Amazon MX Retail · Amex Platinum",monto:420.27},
+    {i:34,fecha:"2026-05-01",tipo:"Gasto",categoria:"ROPA / ZARA",detalle:"Jiashi Maoyi (ropa) · Amex Platinum",monto:799.00},
+    {i:35,fecha:"2026-05-03",tipo:"Gasto",categoria:"SUPER / DESPENSA",detalle:"Kosherits.mx · Amex Platinum",monto:1958.15},
+    {i:36,fecha:"2026-05-04",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Amazon MX Marketplace · Amex Platinum",monto:209.00},
+    {i:37,fecha:"2026-05-04",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Amazon MX Marketplace · Amex Platinum",monto:449.00},
+    {i:38,fecha:"2026-05-05",tipo:"Gasto",categoria:"RAPPI / UBER EATS",detalle:"Rappi · Amex Platinum",monto:417.24},
+    {i:39,fecha:"2026-05-05",tipo:"Gasto",categoria:"RAPPI / UBER EATS",detalle:"Rappi · Amex Platinum",monto:539.90},
+    {i:40,fecha:"2026-05-06",tipo:"Gasto",categoria:"RAPPI / UBER EATS",detalle:"Rappi · Amex Platinum",monto:703.82},
+    {i:41,fecha:"2026-05-07",tipo:"Gasto",categoria:"RESTAURANTE",detalle:"Sanborns Ticomán · Amex Platinum",monto:15.00},
+    {i:42,fecha:"2026-05-08",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Amazon MX Marketplace · Amex Platinum",monto:199.99},
+    {i:43,fecha:"2026-05-08",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Amazon MX Marketplace · Amex Platinum",monto:828.79},
+    {i:44,fecha:"2026-05-10",tipo:"Gasto",categoria:"SAT / CONTABILIDAD (SHEEP)",detalle:"Sheep.mx Contador · Amex Platinum",monto:604.00},
+    {i:45,fecha:"2026-05-11",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Amazon MX Retail · Amex Platinum",monto:1199.00},
+    {i:46,fecha:"2026-05-11",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Amazon MX Retail · Amex Platinum",monto:769.00},
+    {i:47,fecha:"2026-05-11",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Amazon MX Marketplace · Amex Platinum",monto:809.10},
+    {i:48,fecha:"2026-05-11",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Amazon MX Marketplace · Amex Platinum",monto:319.99},
+    {i:49,fecha:"2026-05-11",tipo:"Gasto",categoria:"MICROSOFT OFFICE 365",detalle:"Microsoft · Amex Platinum",monto:299.50},
+    {i:50,fecha:"2026-05-11",tipo:"Gasto",categoria:"MICROSOFT OFFICE 365",detalle:"Microsoft · Amex Platinum",monto:219.00},
+    {i:51,fecha:"2026-05-12",tipo:"Gasto",categoria:"TELEMEX / Internet",detalle:"Telmex · Amex Platinum",monto:349.00},
+    {i:52,fecha:"2026-05-12",tipo:"Gasto",categoria:"DONATIVO / TZEDAKÁ",detalle:"Aish Center Mexico · cuota 1/18 · Amex Platinum",monto:3600.00},
+    {i:53,fecha:"2026-05-13",tipo:"Gasto",categoria:"OTROS COMERCIOS",detalle:"Pro (suscripción) · Amex Platinum",monto:552.00},
+    {i:54,fecha:"2026-05-13",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Amazon MX Marketplace · Amex Platinum",monto:419.99},
+    {i:55,fecha:"2026-05-15",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Amazon MX Marketplace · Amex Platinum",monto:1601.96},
+    {i:56,fecha:"2026-04-19",tipo:"Gasto",categoria:"ESPOSA (Raquel)",detalle:"Shopbop.com $529.55 USD · Amex Platinum",monto:9378.49},
+    {i:57,fecha:"2026-04-21",tipo:"Gasto",categoria:"CLAUDE",detalle:"Anthropic $45 USD · Amex Platinum",monto:801.00},
+    {i:58,fecha:"2026-05-01",tipo:"Gasto",categoria:"ESPOSA (Raquel)",detalle:"Revolve $233.54 USD · Amex Platinum",monto:4200.13},
+    {i:59,fecha:"2026-05-04",tipo:"Gasto",categoria:"OTROS COMERCIOS",detalle:"Oura Ring suscripción $5.99 USD · Amex Platinum",monto:107.73},
+  ];
+  entradas.forEach(e=>{
+    const id=BASE_ID+e.i*1000;
+    if(!gastos.some(g=>g.id===id)){
+      gastos.push({id,fecha:e.fecha,tipo:e.tipo,categoria:e.categoria,detalle:e.detalle,monto:e.monto});
+    }
+  });
+  try{localStorage.setItem("gp_jose_v3",JSON.stringify(gastos));}catch{}
+  localStorage.setItem(KEY,"1");
+})();
+// Samsung Care+ Fold 7 — mayo 2026
+(function(){
+  const KEY="gp_jose_migr_samsungcare_may2026_v1";
+  if(localStorage.getItem(KEY))return;
+  const id=2100000000000;
+  if(!gastos.some(g=>g.id===id)){
+    gastos.push({id,fecha:"2026-05-17",tipo:"Gasto",categoria:"SAMSUNG (suscripción)",detalle:"Samsung Care+ Galaxy Z Fold 7 · $10,999 a 18 MSI directo Samsung ($611/mes)",monto:10999.00});
+  }
+  try{localStorage.setItem("gp_jose_v3",JSON.stringify(gastos));}catch{}
+  localStorage.setItem(KEY,"1");
+})();
+// Pago Banamex Explora *3204 — Estado may-2026 (vence 8-jun-2026)
+(function(){
+  const KEY="gp_jose_migr_banamex_pago_may2026_v1";
+  if(localStorage.getItem(KEY))return;
+  const id=2800000000000;
+  if(!gastos.some(g=>g.id===id)){
+    gastos.push({id,fecha:"2026-06-08",tipo:"Deuda-Pago",categoria:"BANAMEX EXPLORA *3204",detalle:"Pago estado may-2026 · para no generar intereses",monto:14090.75});
+  }
+  try{localStorage.setItem("gp_jose_v3",JSON.stringify(gastos));}catch{}
+  localStorage.setItem(KEY,"1");
+})();
+// Banamex Explora *3204 — Corte 18-mar-2026 (período 19-feb al 18-mar-2026)
+(function(){
+  const KEY="gp_jose_migr_banamex_mar2026_v1";
+  if(localStorage.getItem(KEY))return;
+  const BASE_ID=2500000000000;
+  const entradas=[
+    {i:0,fecha:"2026-02-18",tipo:"Gasto",categoria:"GASOLINA / VIATICOS",detalle:"ABTS PQ Lindavis · Banamex Explora",monto:99.00},
+    {i:1,fecha:"2026-02-26",tipo:"Gasto",categoria:"ESPOSA (Raquel)",detalle:"PayPal*GBMComSadec · T.Adic. Raquel · Banamex Explora",monto:2999.25},
+    {i:2,fecha:"2026-02-19",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Amazon MSI 8/24 · Banamex Explora",monto:271.44},
+    {i:3,fecha:"2026-02-23",tipo:"Gasto",categoria:"LUZ",detalle:"CFE · Banamex Explora",monto:197.00},
+    {i:4,fecha:"2026-02-28",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"AMZ Audible MX · Banamex Explora",monto:259.00},
+    {i:5,fecha:"2026-03-03",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"AMZ Audible MX · Banamex Explora",monto:222.86},
+    {i:6,fecha:"2026-03-09",tipo:"Gasto",categoria:"AGUA",detalle:"MAIM Solucion Agua · Banamex Explora",monto:180.00},
+  ];
+  entradas.forEach(e=>{const id=BASE_ID+e.i*1000;if(!gastos.some(g=>g.id===id)){gastos.push({id,fecha:e.fecha,tipo:e.tipo,categoria:e.categoria,detalle:e.detalle,monto:e.monto});}});
+  try{localStorage.setItem("gp_jose_v3",JSON.stringify(gastos));}catch{}
+  localStorage.setItem(KEY,"1");
+})();
+// Banamex Explora *3204 — Corte 17-abr-2026 (período 19-mar al 17-abr-2026)
+(function(){
+  const KEY="gp_jose_migr_banamex_abr2026_v1";
+  if(localStorage.getItem(KEY))return;
+  const BASE_ID=2600000000000;
+  const entradas=[
+    {i:0,fecha:"2026-03-27",tipo:"Gasto",categoria:"GASTOS VARIOS",detalle:"Farmatodo Miramontes · Banamex Explora",monto:187.50},
+    {i:1,fecha:"2026-03-29",tipo:"Gasto",categoria:"ROPA / ZARA",detalle:"Massimo Dutti Antara · Banamex Explora",monto:3001.00},
+    {i:2,fecha:"2026-03-19",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Amazon MSI 9/24 · Banamex Explora",monto:271.44},
+    {i:3,fecha:"2026-03-28",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"AMZ Audible MX · Banamex Explora",monto:129.00},
+    {i:4,fecha:"2026-04-07",tipo:"Gasto",categoria:"AGUA",detalle:"Sol en Agua · Banamex Explora",monto:180.00},
+    {i:5,fecha:"2026-04-12",tipo:"Gasto",categoria:"CLAUDE",detalle:"Claude.AI Subscription $200 USD · Banamex Explora",monto:3477.96},
+  ];
+  entradas.forEach(e=>{const id=BASE_ID+e.i*1000;if(!gastos.some(g=>g.id===id)){gastos.push({id,fecha:e.fecha,tipo:e.tipo,categoria:e.categoria,detalle:e.detalle,monto:e.monto});}});
+  try{localStorage.setItem("gp_jose_v3",JSON.stringify(gastos));}catch{}
+  localStorage.setItem(KEY,"1");
+})();
+// Banamex Explora *3204 — Corte 18-may-2026 (período 18-abr al 18-may-2026)
+(function(){
+  const KEY="gp_jose_migr_banamex_may2026_v1";
+  if(localStorage.getItem(KEY))return;
+  const BASE_ID=2700000000000;
+  const entradas=[
+    {i:0,fecha:"2026-05-04",tipo:"Gasto",categoria:"VUELOS",detalle:"STR*Certificado Vuelo · Banamex Explora",monto:12708.00},
+    {i:1,fecha:"2026-05-15",tipo:"Gasto",categoria:"CURSOS / EDUCACIÓN",detalle:"Univ Anahuac Norte · Banamex Explora",monto:290.00},
+    {i:2,fecha:"2026-05-15",tipo:"Gasto",categoria:"RESTAURANTE",detalle:"WuziPay*Azucar Zaz · Banamex Explora",monto:438.00},
+    {i:3,fecha:"2026-04-18",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Amazon MSI 10/24 · Banamex Explora",monto:271.44},
+    {i:4,fecha:"2026-04-28",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"AMZ Audible MX · Banamex Explora",monto:129.00},
+    {i:5,fecha:"2026-04-29",tipo:"Gasto",categoria:"UBER / TAXI",detalle:"MexPago*Mueve Ciudad · Banamex Explora",monto:50.00},
+    {i:6,fecha:"2026-05-08",tipo:"Gasto",categoria:"AGUA",detalle:"MAIM Soluciones Agua · Banamex Explora",monto:180.00},
+  ];
+  entradas.forEach(e=>{const id=BASE_ID+e.i*1000;if(!gastos.some(g=>g.id===id)){gastos.push({id,fecha:e.fecha,tipo:e.tipo,categoria:e.categoria,detalle:e.detalle,monto:e.monto});}});
+  try{localStorage.setItem("gp_jose_v3",JSON.stringify(gastos));}catch{}
+  localStorage.setItem(KEY,"1");
+})();
+// Registro: Royal Gas — recibo May 2026 (período 23-abr al 22-may-2026)
+(function(){
+  const KEY="gp_jose_migr_royalgas_may2026_v1";
+  if(localStorage.getItem(KEY))return;
+  const id=2300000000000;
+  if(!gastos.some(g=>g.id===id)){
+    gastos.push({id,fecha:"2026-05-22",tipo:"Gasto",categoria:"GAS",detalle:"Royal Gas · Folio 931179 · 84.27 L · Transferencia",monto:903.42});
+  }
+  try{localStorage.setItem("gp_jose_v3",JSON.stringify(gastos));}catch{}
+  localStorage.setItem(KEY,"1");
+})();
+// Registro: Bupa Pago 1/4 — 3 MSI · $51,037.75 total · Amex ***3004
+(function(){
+  const KEY="gp_jose_migr_bupa_pago1_may2026_v2";
+  if(localStorage.getItem(KEY))return;
+  const BASE_ID=2400000000000;
+  const cuotas=[
+    {i:0,fecha:"2026-06-16",detalle:"Bupa Raquel · Pago 1/4 MSI 1/3 · Póliza 889875 · Amex ***3004"},
+    {i:1,fecha:"2026-07-16",detalle:"Bupa Raquel · Pago 1/4 MSI 2/3 · Póliza 889875 · Amex ***3004"},
+    {i:2,fecha:"2026-08-16",detalle:"Bupa Raquel · Pago 1/4 MSI 3/3 → último · Póliza 889875 · Amex ***3004"},
+  ];
+  cuotas.forEach(c=>{
+    const id=BASE_ID+c.i*1000;
+    if(!gastos.some(g=>g.id===id)){
+      gastos.push({id,fecha:c.fecha,tipo:"Gasto",categoria:"BUPA (seguro médico)",detalle:c.detalle,monto:17012.58});
+    }
+  });
+  try{localStorage.setItem("gp_jose_v3",JSON.stringify(gastos));}catch{}
+  localStorage.setItem(KEY,"1");
+})();
+// Registro: Amazon Electrónicos ($4,899 · Amex Platinum · 6 MSI) — compra 25 May 2026
+(function(){
+  const KEY="gp_jose_migr_amazon_elec_may2026_v1";
+  if(localStorage.getItem(KEY))return;
+  const id=2200000000000;
+  if(!gastos.some(g=>g.id===id)){
+    gastos.push({id,fecha:"2026-05-25",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Amazon Electrónicos MSI 1/6 · Amex Platinum",monto:816.50});
+  }
+  try{localStorage.setItem("gp_jose_v3",JSON.stringify(gastos));}catch{}
+  localStorage.setItem(KEY,"1");
+})();
+// Registro: Bupa Jose — Póliza propia ($20,350.75 · Amex Platinum · 3 MSI) — cargo 29-abr-2026
+(function(){
+  const KEY="gp_jose_migr_bupa_jose_abr2026_v1";
+  if(localStorage.getItem(KEY))return;
+  const BASE_ID=2900000000000;
+  const entradas=[
+    {i:0,fecha:"2026-05-29",tipo:"Gasto",categoria:"SEGUROS",detalle:"Bupa Jose · Póliza propia · MSI 1/3 · Amex Platinum",monto:6783.58},
+    {i:1,fecha:"2026-06-29",tipo:"Gasto",categoria:"SEGUROS",detalle:"Bupa Jose · Póliza propia · MSI 2/3 · Amex Platinum",monto:6783.58},
+    {i:2,fecha:"2026-07-29",tipo:"Gasto",categoria:"SEGUROS",detalle:"Bupa Jose · Póliza propia · MSI 3/3 · Amex Platinum",monto:6783.59},
+  ];
+  entradas.forEach(e=>{const id=BASE_ID+e.i*1000;if(!gastos.some(g=>g.id===id)){gastos.push({id,...e});}});
+  try{localStorage.setItem("gp_jose_v3",JSON.stringify(gastos));}catch{}
+  localStorage.setItem(KEY,"1");
+})();
+// Registro: Hotel The Lombardy NYC — 9 MSI MasterCard *9618 + cargo en propiedad
+(function(){
+  const KEY="gp_jose_migr_hotel_nyc_may2026_v2";
+  if(localStorage.getItem(KEY))return;
+  // Eliminar entrada anterior (v1) si existe
+  gastos=gastos.filter(g=>g.id!==3000000000000&&g.id!==3000001000000);
+  const BASE_ID=3100000000000;
+  const meses=[
+    {i:0,fecha:"2026-06-18"},
+    {i:1,fecha:"2026-07-18"},
+    {i:2,fecha:"2026-08-18"},
+    {i:3,fecha:"2026-09-18"},
+    {i:4,fecha:"2026-10-18"},
+    {i:5,fecha:"2026-11-18"},
+    {i:6,fecha:"2026-12-18"},
+    {i:7,fecha:"2027-01-18"},
+    {i:8,fecha:"2027-02-18"},
+  ];
+  meses.forEach(e=>{
+    const id=BASE_ID+e.i*1000;
+    const cuota=e.i+1;
+    const monto=cuota===9?2872.12:2872.11;
+    if(!gastos.some(g=>g.id===id)){gastos.push({id,fecha:e.fecha,tipo:"Gasto",categoria:"VIAJES / VACACIONES",detalle:`Hotel The Lombardy NYC · MSI ${cuota}/9 · MasterCard *9618`,monto});}
+  });
+  // Cargo en propiedad julio
+  const propId=3100009000;
+  if(!gastos.some(g=>g.id===propId)){gastos.push({id:propId,fecha:"2026-07-12",tipo:"Gasto",categoria:"VIAJES / VACACIONES",detalle:"Hotel The Lombardy NYC · cargo en propiedad",monto:1990.00});}
+  try{localStorage.setItem("gp_jose_v3",JSON.stringify(gastos));}catch{}
+  localStorage.setItem(KEY,"1");
+})();
+// Maaser mayo 2026 — Aish + Knis Valle
+(function(){
+  const KEY="gp_jose_migr_maaser_may2026_v2";
+  if(localStorage.getItem(KEY))return;
+  const BASE_ID=3300000000000;
+  const entradas=[
+    {i:0,fecha:"2026-05-01",tipo:"Gasto",categoria:"MAASER (10%)",detalle:"Aish Center Mexico · donativo mayo 2026",monto:8000.00},
+    {i:1,fecha:"2026-05-01",tipo:"Gasto",categoria:"MAASER (10%)",detalle:"Knis Valle · donativo mayo 2026",monto:8000.00},
+    {i:2,fecha:"2026-05-01",tipo:"Gasto",categoria:"MAASER (10%)",detalle:"Maaser general mayo 2026",monto:10000.00},
+  ];
+  entradas.forEach(e=>{const id=BASE_ID+e.i*1000;if(!gastos.some(g=>g.id===id)){gastos.push({id,...e});}});
+  try{localStorage.setItem("gp_jose_v3",JSON.stringify(gastos));}catch{}
+  localStorage.setItem(KEY,"1");
+})();
+// Luis — mantenimiento casa semanal jun-2026
+(function(){
+  const KEY="gp_jose_migr_luis_jun2026_v1";
+  if(localStorage.getItem(KEY))return;
+  const id=3500000000000;
+  if(!gastos.some(g=>g.id===id)){
+    gastos.push({id,fecha:"2026-06-02",tipo:"Gasto",categoria:"MTTO CASA (mantenimiento)",detalle:"Luis · mantenimiento casa · gasto semanal",monto:2400.00});
+  }
+  try{localStorage.setItem("gp_jose_v3",JSON.stringify(gastos));}catch{}
+  localStorage.setItem(KEY,"1");
+})();
+// Mezuzá y Tefilín — jun-2026
+(function(){
+  const KEY="gp_jose_migr_mezuza_jun2026_v1";
+  if(localStorage.getItem(KEY))return;
+  const id=3600000000000;
+  if(!gastos.some(g=>g.id===id)){
+    gastos.push({id,fecha:"2026-06-02",tipo:"Gasto",categoria:"SINAGOGA / RELIGIOSO",detalle:"Mezuzá y Tefilín",monto:13400.00});
+  }
+  try{localStorage.setItem("gp_jose_v3",JSON.stringify(gastos));}catch{}
+  localStorage.setItem(KEY,"1");
+})();
+// Pago Amex Platinum — 5-jun-2026
+(function(){
+  const KEY="gp_jose_migr_amex_platinum_pago_jun2026_v1";
+  if(localStorage.getItem(KEY))return;
+  const id=3700000000000;
+  if(!gastos.some(g=>g.id===id)){
+    gastos.push({id,fecha:"2026-06-05",tipo:"Deuda-Pago",categoria:"TARJETA AMEX GOLD",detalle:"Pago Amex Platinum *3004 · pago para no generar intereses",monto:42503.38});
+  }
+  try{localStorage.setItem("gp_jose_v3",JSON.stringify(gastos));}catch{}
+  localStorage.setItem(KEY,"1");
+})();
+// Pagos jun-2026: Palacio + Banamex Explora
+(function(){
+  const KEY="gp_jose_migr_pagos_jun2026_v1";
+  if(localStorage.getItem(KEY))return;
+  const BASE_ID=3800000000000;
+  const entradas=[
+    {i:0,fecha:"2026-06-08",tipo:"Deuda-Pago",categoria:"PALACIO DE HIERRO",detalle:"Pago Tarjeta Palacio *5731",monto:6645.18},
+    {i:1,fecha:"2026-06-08",tipo:"Deuda-Pago",categoria:"TARJETA BANAMEX EXPLORA",detalle:"Pago Banamex Explora *3204 · pago para no generar intereses",monto:14090.75},
+  ];
+  entradas.forEach(e=>{const id=BASE_ID+e.i*1000;if(!gastos.some(g=>g.id===id)){gastos.push({id,...e});}});
+  try{localStorage.setItem("gp_jose_v3",JSON.stringify(gastos));}catch{}
+  localStorage.setItem(KEY,"1");
+})();
+// Pago Royal Gas — Folio 931179 (jun-2026)
+(function(){
+  const KEY="gp_jose_migr_royalgas_jun2026_v1";
+  if(localStorage.getItem(KEY))return;
+  const id=3400000000000;
+  if(!gastos.some(g=>g.id===id)){
+    gastos.push({id,fecha:"2026-06-02",tipo:"Gasto",categoria:"GAS",detalle:"Royal Gas · Folio 931179 · transferencia",monto:903.42});
+  }
+  try{localStorage.setItem("gp_jose_v3",JSON.stringify(gastos));}catch{}
+  localStorage.setItem(KEY,"1");
+})();
+// Ingreso mayo 2026 — $95,000 + IVA 16%
+(function(){
+  const KEY="gp_jose_migr_ingreso_may2026_v2";
+  if(localStorage.getItem(KEY))return;
+  const id=3200000000000;
+  if(!gastos.some(g=>g.id===id)){
+    gastos.push({id,fecha:"2026-05-01",tipo:"Ingreso",categoria:"EMPLEO / INGRESO",detalle:"Sueldo mayo 2026 · según factura",monto:94705.39});
+  }
+  try{localStorage.setItem("gp_jose_v3",JSON.stringify(gastos));}catch{}
+  localStorage.setItem(KEY,"1");
+})();
+// Dr. Chaya — consulta jun-2026
+(function(){
+  const KEY="gp_jose_migr_drchaya_jun2026_v2";
+  if(localStorage.getItem(KEY))return;
+  const BASE_ID=3900000000000;
+  const entradas=[
+    {i:0,fecha:"2026-06-15",tipo:"Gasto",categoria:"SALUD",detalle:"Dr. Chaya · Ultrasonido · tarjeta",monto:1240.00},
+    {i:1,fecha:"2026-06-15",tipo:"Gasto",categoria:"SALUD",detalle:"Dr. Chaya · Consulta · transferencia",monto:2500.00},
+  ];
+  entradas.forEach(e=>{const id=BASE_ID+e.i*1000;if(!gastos.some(g=>g.id===id)){gastos.push({id,...e});}});
+  try{localStorage.setItem("gp_jose_v3",JSON.stringify(gastos));}catch{}
+  localStorage.setItem(KEY,"1");
+})();
+// Gym — jun-2026
+(function(){
+  const KEY="gp_jose_migr_gym_jun2026_v1";
+  if(localStorage.getItem(KEY))return;
+  const id=4000000000000;
+  if(!gastos.some(g=>g.id===id)){
+    gastos.push({id,fecha:"2026-06-15",tipo:"Gasto",categoria:"SALUD",detalle:"Gym · mensualidad · transferencia",monto:4000.00});
+  }
+  try{localStorage.setItem("gp_jose_v3",JSON.stringify(gastos));}catch{}
+  localStorage.setItem(KEY,"1");
+})();
+// Pago Exalta Hero — jun-2026
+(function(){
+  const KEY="gp_jose_migr_coche_jun2026_v1";
+  if(localStorage.getItem(KEY))return;
+  const id=4100000000000;
+  if(!gastos.some(g=>g.id===id)){
+    gastos.push({id,fecha:"2026-06-16",tipo:"Gasto",categoria:"CRÉDITOS Y PAGOS",detalle:"GA Solucion Leasing · Renta 7/24 + Gastos Op. · Contrato 3758 · CFDI deducible · BBVA *3572",monto:13900.04});
+  }
+  try{localStorage.setItem("gp_jose_v3",JSON.stringify(gastos));}catch{}
+  localStorage.setItem(KEY,"1");
+})();
+// Estado de Cuenta Amex Gold · corte 13-Jun-2026 (período 14-may al 13-jun-2026)
+(function(){
+  const KEY="gp_jose_migr_gold_jun2026_v1";
+  if(localStorage.getItem(KEY))return;
+  const BASE_ID=4200000000000;
+  const entradas=[
+    // Jose
+    {i:0, fecha:"2026-05-13",tipo:"Gasto",categoria:"SALUD",detalle:"Salón · Amex Gold",monto:390.00},
+    {i:1, fecha:"2026-05-14",tipo:"Gasto",categoria:"ROPA / ZARA",detalle:"Salomón · MSI 3/3 (último) · Amex Gold",monto:1399.76},
+    {i:2, fecha:"2026-05-14",tipo:"Gasto",categoria:"ROPA / ZARA",detalle:"Ben & Frank · MSI 3/3 (último) · Amex Gold",monto:730.00},
+    {i:3, fecha:"2026-05-14",tipo:"Gasto",categoria:"OTROS COMERCIOS",detalle:"Ulta Beauty Antara · MSI 3/6 · Amex Gold",monto:689.17},
+    {i:4, fecha:"2026-05-14",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Mercado Libre · MSI 3/3 (último) · Amex Gold",monto:499.66},
+    {i:5, fecha:"2026-05-14",tipo:"Gasto",categoria:"RESTAURANTE",detalle:"Yakkumi · Amex Gold",monto:839.50},
+    {i:6, fecha:"2026-05-20",tipo:"Gasto",categoria:"OTROS COMERCIOS",detalle:"Yolopago*Armando Saldiv · Amex Gold",monto:250.00},
+    {i:7, fecha:"2026-05-21",tipo:"Gasto",categoria:"RESTAURANTE",detalle:"Subway · Amex Gold",monto:248.00},
+    {i:8, fecha:"2026-05-24",tipo:"Gasto",categoria:"RESTAURANTE",detalle:"Bout Big Bone · Valle de Bravo · Amex Gold",monto:600.00},
+    {i:9, fecha:"2026-05-26",tipo:"Gasto",categoria:"OTROS COMERCIOS",detalle:"Miniso Punta Norte · Amex Gold",monto:199.80},
+    {i:10,fecha:"2026-05-27",tipo:"Gasto",categoria:"SALUD",detalle:"Farmatodo Miramontes · Amex Gold",monto:73.00},
+    {i:11,fecha:"2026-05-31",tipo:"Gasto",categoria:"RESTAURANTE",detalle:"Yakkumi · Amex Gold",monto:184.00},
+    {i:12,fecha:"2026-05-31",tipo:"Gasto",categoria:"RESTAURANTE",detalle:"Yakkumi · Amex Gold",monto:276.00},
+    {i:13,fecha:"2026-06-03",tipo:"Gasto",categoria:"GASTOS VARIOS",detalle:"DHL Express · Amex Gold",monto:177.33},
+    {i:14,fecha:"2026-06-03",tipo:"Gasto",categoria:"SUPER / DESPENSA",detalle:"Superama Popocatépetl · Amex Gold",monto:327.00},
+    {i:15,fecha:"2026-06-03",tipo:"Gasto",categoria:"SUPER / DESPENSA",detalle:"Superama Popocatépetl · Amex Gold",monto:97.00},
+    {i:16,fecha:"2026-06-04",tipo:"Gasto",categoria:"RESTAURANTE",detalle:"Yakkumi · Amex Gold",monto:599.15},
+    {i:17,fecha:"2026-06-04",tipo:"Gasto",categoria:"RESTAURANTE",detalle:"Avivia Bosques · Amex Gold",monto:500.00},
+    {i:18,fecha:"2026-06-08",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Mercado Libre · Amex Gold",monto:1070.44},
+    {i:19,fecha:"2026-06-11",tipo:"Gasto",categoria:"RESTAURANTE",detalle:"Yakkumi · Amex Gold",monto:311.30},
+    // Raquel
+    {i:20,fecha:"2026-05-26",tipo:"Gasto",categoria:"ESPOSA (Raquel)",detalle:"Tienda COM MEX (online) · T.Adic. Raquel · Amex Gold",monto:506.29},
+    {i:21,fecha:"2026-05-26",tipo:"Gasto",categoria:"SUPER / DESPENSA",detalle:"Costco Interlomas · T.Adic. Raquel · Amex Gold",monto:2734.33},
+    {i:22,fecha:"2026-05-28",tipo:"Gasto",categoria:"ESPOSA (Raquel)",detalle:"Masu K Style (ropa) · T.Adic. Raquel · Amex Gold",monto:4575.00},
+    {i:23,fecha:"2026-06-05",tipo:"Gasto",categoria:"SUPER / DESPENSA",detalle:"Kosher Mexico · T.Adic. Raquel · Amex Gold",monto:490.00},
+    {i:24,fecha:"2026-06-09",tipo:"Gasto",categoria:"ESPOSA (Raquel)",detalle:"Sephora Punta Norte · T.Adic. Raquel · Amex Gold",monto:5264.00},
+  ];
+  entradas.forEach(e=>{const id=BASE_ID+e.i*1000;if(!gastos.some(g=>g.id===id)){gastos.push({id,...e});}});
+  try{localStorage.setItem("gp_jose_v3",JSON.stringify(gastos));}catch{}
+  localStorage.setItem(KEY,"1");
+})();
+let mesActual=new Date().getMonth();
+let anioActual=new Date().getFullYear();
+let editId=null;
+document.getElementById("anio").textContent=anioActual;
+
+// Poblar select con optgroups
+const sel=document.getElementById("f-cat");
+GRUPOS.forEach(gr=>{
+  const og=document.createElement("optgroup");
+  og.label=gr.g;
+  gr.cats.forEach(c=>{const o=document.createElement("option");o.value=c;o.textContent=c;og.appendChild(o);});
+  sel.appendChild(og);
+});
+
+document.getElementById("f-fecha").value=new Date().toISOString().split("T")[0];
+
+try{const s=null;if(s)gastos=JSON.parse(s);else{gastos=[{"id":1700000000000,"fecha":"2011-10-02","tipo":"Gasto","categoria":"OTROS","monto":876.0,"detalle":""},{"id":1700000001000,"fecha":"2025-05-17","tipo":"Gasto","categoria":"GASOLINA / VIATICOS","monto":500.0,"detalle":"PASE"},{"id":1700000002000,"fecha":"2025-05-17","tipo":"Gasto","categoria":"GASOLINA / VIATICOS","monto":500.0,"detalle":"PASE"},{"id":1700000003000,"fecha":"2025-06-12","tipo":"Gasto","categoria":"MANTENIMIENTO COCHES","monto":2065.0,"detalle":"SOPORTE DE MOTOR JEEP "},{"id":1700000004000,"fecha":"2025-06-16","tipo":"Gasto","categoria":"SEGURO COCHES","monto":8674.53,"detalle":"RAQUEL"},{"id":1700000005000,"fecha":"2025-06-20","tipo":"Gasto","categoria":"SEGURO MÉDICO (Raquel)","monto":43877.0,"detalle":"SEGURO RAQUEL"},{"id":1700000006000,"fecha":"2025-08-29","tipo":"Gasto","categoria":"SEGURO MÉDICO (Raquel)","monto":42789.5,"detalle":"SEGURO RAQUEL"},{"id":1700000007000,"fecha":"2025-09-12","tipo":"Ingreso","categoria":"EMPLEO / INGRESO","monto":99919.97,"detalle":""},{"id":1700000008000,"fecha":"2025-09-15","tipo":"Gasto","categoria":"ESPOSA (Raquel)","monto":15000.0,"detalle":""},{"id":1700000009000,"fecha":"2025-09-15","tipo":"Gasto","categoria":"MANTENIMIENTO COCHES","monto":5412.0,"detalle":"LLANTA COCHE PEPE "},{"id":1700000010000,"fecha":"2025-09-16","tipo":"Gasto","categoria":"SEGURO MÉDICO (Raquel)","monto":3633.0,"detalle":"DEDUCIBLE RAQUEL "},{"id":1700000011000,"fecha":"2025-09-19","tipo":"Gasto","categoria":"POP TV","monto":3600.0,"detalle":""},{"id":1700000012000,"fecha":"2025-09-21","tipo":"Gasto","categoria":"SINAGOGA / RELIGIOSO","monto":4500.0,"detalle":""},{"id":1700000013000,"fecha":"2025-09-26","tipo":"Gasto","categoria":"SEGURO MÉDICO (Raquel)","monto":10216.0,"detalle":"SEGURO PEPE "},{"id":1700000014000,"fecha":"2025-09-27","tipo":"Gasto","categoria":"GAS","monto":789.6,"detalle":""},{"id":1700000015000,"fecha":"2025-10-02","tipo":"Gasto","categoria":"OTROS","monto":3900.0,"detalle":"ZARA RAQUEL "},{"id":1700000016000,"fecha":"2025-10-04","tipo":"Gasto","categoria":"DENTAL","monto":4777.0,"detalle":""},{"id":1700000017000,"fecha":"2025-10-04","tipo":"Gasto","categoria":"SEGURO CASA","monto":4002.0,"detalle":"REMODELACION "},{"id":1700000018000,"fecha":"2025-10-09","tipo":"Gasto","categoria":"SEGURO COCHES","monto":6930.0,"detalle":"PEPE"},{"id":1700000019000,"fecha":"2025-10-09","tipo":"Gasto","categoria":"MUCHACHA (Maribel)","monto":500.0,"detalle":"MARIBEL "},{"id":1700000020000,"fecha":"2025-10-13","tipo":"Gasto","categoria":"SEGURO COCHES","monto":6930.41,"detalle":"SEGURO JEEP RENEGADE"},{"id":1700000021000,"fecha":"2025-10-13","tipo":"Gasto","categoria":"SAT / CONTABILIDAD (SHEEP)","monto":1065.0,"detalle":"SAT"},{"id":1700000022000,"fecha":"2025-10-15","tipo":"Ingreso","categoria":"EMPLEO / INGRESO","monto":98358.43,"detalle":""},{"id":1700000023000,"fecha":"2025-10-15","tipo":"Ahorro","categoria":"MAASER (10%)","monto":9835.0,"detalle":"MENOS IMPUESTOS "},{"id":1700000024000,"fecha":"2025-10-15","tipo":"Gasto","categoria":"MANTENIMIENTO COCHES","monto":8490.0,"detalle":"COCHE RAQUEL "},{"id":1700000025000,"fecha":"2025-10-16","tipo":"Gasto","categoria":"ESPOSA (Raquel)","monto":20000.0,"detalle":""},{"id":1700000026000,"fecha":"2025-10-16","tipo":"Ahorro","categoria":"AHORRO GENERAL","monto":6918.0,"detalle":""},{"id":1700000027000,"fecha":"2025-10-16","tipo":"Gasto","categoria":"SEGURO MÉDICO (Raquel)","monto":3632.52,"detalle":"DEDUCIBLE RAQUEL "},{"id":1700000028000,"fecha":"2025-10-16","tipo":"Gasto","categoria":"MUCHACHA (Maribel)","monto":500.0,"detalle":""},{"id":1700000029000,"fecha":"2025-10-17","tipo":"Gasto","categoria":"SEGURO MÉDICO (Raquel)","monto":8324.0,"detalle":"LABORATORIOS MEDICOS POLANCO "},{"id":1700000030000,"fecha":"2025-10-17","tipo":"Gasto","categoria":"OTROS","monto":6000.0,"detalle":"SEMANA "},{"id":1700000031000,"fecha":"2025-10-17","tipo":"Gasto","categoria":"GASOLINA / VIATICOS","monto":1280.0,"detalle":""},{"id":1700000032000,"fecha":"2025-10-17","tipo":"Gasto","categoria":"MANTENIMIENTO COCHES","monto":950.0,"detalle":"MERCADO LIBRE"},{"id":1700000033000,"fecha":"2025-10-18","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":329.0,"detalle":""},{"id":1700000034000,"fecha":"2025-10-19","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":142.0,"detalle":""},{"id":1700000035000,"fecha":"2025-10-20","tipo":"Gasto","categoria":"RESTAURANTE","monto":1000.0,"detalle":"PAN Y CANELA "},{"id":1700000036000,"fecha":"2025-10-20","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":983.0,"detalle":""},{"id":1700000037000,"fecha":"2025-10-21","tipo":"Gasto","categoria":"DOCTORES","monto":3000.0,"detalle":"dr mercado "},{"id":1700000038000,"fecha":"2025-10-21","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":551.0,"detalle":""},{"id":1700000039000,"fecha":"2025-10-21","tipo":"Gasto","categoria":"MUCHACHA (Maribel)","monto":500.0,"detalle":"MARIBEL "},{"id":1700000040000,"fecha":"2025-10-21","tipo":"Gasto","categoria":"RAPPI / UBER EATS","monto":352.0,"detalle":"rappi"},{"id":1700000041000,"fecha":"2025-10-22","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":2205.0,"detalle":""},{"id":1700000042000,"fecha":"2025-10-22","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":1156.0,"detalle":""},{"id":1700000043000,"fecha":"2025-10-22","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":749.0,"detalle":""},{"id":1700000044000,"fecha":"2025-10-22","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":305.0,"detalle":"TIRA DE LED COCINA "},{"id":1700000045000,"fecha":"2025-10-22","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":283.0,"detalle":""},{"id":1700000046000,"fecha":"2025-10-22","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":189.0,"detalle":""},{"id":1700000047000,"fecha":"2025-10-23","tipo":"Gasto","categoria":"OTROS","monto":792.0,"detalle":"FARMACIA"},{"id":1700000048000,"fecha":"2025-10-23","tipo":"Gasto","categoria":"RAPPI / UBER EATS","monto":657.0,"detalle":""},{"id":1700000049000,"fecha":"2025-10-23","tipo":"Gasto","categoria":"MUCHACHA (Maribel)","monto":500.0,"detalle":""},{"id":1700000050000,"fecha":"2025-10-24","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":463.61,"detalle":""},{"id":1700000051000,"fecha":"2025-10-24","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":199.0,"detalle":""},{"id":1700000052000,"fecha":"2025-10-26","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":5450.0,"detalle":"SILLON CASA "},{"id":1700000053000,"fecha":"2025-10-26","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":5450.0,"detalle":"CASA NOGAL"},{"id":1700000054000,"fecha":"2025-10-26","tipo":"Gasto","categoria":"RESTAURANTE","monto":3116.5,"detalle":""},{"id":1700000055000,"fecha":"2025-10-26","tipo":"Gasto","categoria":"RESTAURANTE","monto":3116.5,"detalle":"proseco "},{"id":1700000056000,"fecha":"2025-10-26","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":2199.0,"detalle":"BANCOS CASA "},{"id":1700000057000,"fecha":"2025-10-26","tipo":"Gasto","categoria":"RESTAURANTE","monto":604.0,"detalle":"AJGLA"},{"id":1700000058000,"fecha":"2025-10-26","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":400.0,"detalle":""},{"id":1700000059000,"fecha":"2025-10-26","tipo":"Gasto","categoria":"OTROS","monto":300.0,"detalle":"ESTACIONAMINTO "},{"id":1700000060000,"fecha":"2025-10-26","tipo":"Gasto","categoria":"OTROS","monto":120.0,"detalle":"ESTACIONAINETO "},{"id":1700000061000,"fecha":"2025-10-26","tipo":"Gasto","categoria":"OTROS","monto":75.0,"detalle":""},{"id":1700000062000,"fecha":"2025-10-26","tipo":"Gasto","categoria":"OTROS","monto":30.0,"detalle":"ESTACIONAINETO "},{"id":1700000063000,"fecha":"2025-10-27","tipo":"Gasto","categoria":"OTROS","monto":4800.0,"detalle":"SEMANA "},{"id":1700000064000,"fecha":"2025-10-27","tipo":"Gasto","categoria":"MUCHACHA (Maribel)","monto":500.0,"detalle":"MARIBEL "},{"id":1700000065000,"fecha":"2025-10-27","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":220.0,"detalle":""},{"id":1700000066000,"fecha":"2025-10-28","tipo":"Gasto","categoria":"SINAGOGA / RELIGIOSO","monto":1900.0,"detalle":""},{"id":1700000067000,"fecha":"2025-10-28","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":1000.0,"detalle":""},{"id":1700000068000,"fecha":"2025-10-28","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":199.0,"detalle":""},{"id":1700000069000,"fecha":"2025-10-29","tipo":"Gasto","categoria":"MTTO CASA (mantenimiento)","monto":12694.0,"detalle":""},{"id":1700000070000,"fecha":"2025-10-29","tipo":"Gasto","categoria":"DOCTORES","monto":3500.0,"detalle":"HARFUSH "},{"id":1700000071000,"fecha":"2025-10-29","tipo":"Gasto","categoria":"DENTAL","monto":3000.0,"detalle":""},{"id":1700000072000,"fecha":"2025-10-29","tipo":"Gasto","categoria":"CUOTA EXTRAORDINARIA","monto":2938.0,"detalle":""},{"id":1700000073000,"fecha":"2025-10-29","tipo":"Gasto","categoria":"RESTAURANTE","monto":1582.0,"detalle":""},{"id":1700000074000,"fecha":"2025-10-29","tipo":"Gasto","categoria":"DOCTORES","monto":1500.0,"detalle":"ANGIE"},{"id":1700000075000,"fecha":"2025-10-29","tipo":"Gasto","categoria":"RAPPI / UBER EATS","monto":313.57,"detalle":""},{"id":1700000076000,"fecha":"2025-10-29","tipo":"Gasto","categoria":"OTROS","monto":240.0,"detalle":"ESTACIONAINETO "},{"id":1700000077000,"fecha":"2025-10-30","tipo":"Gasto","categoria":"OTROS","monto":4800.0,"detalle":"SEMANA "},{"id":1700000078000,"fecha":"2025-10-30","tipo":"Gasto","categoria":"TELEFONO","monto":649.0,"detalle":""},{"id":1700000079000,"fecha":"2025-11-01","tipo":"Gasto","categoria":"MTTO CASA (mantenimiento)","monto":12694.0,"detalle":""},{"id":1700000080000,"fecha":"2025-11-01","tipo":"Gasto","categoria":"CUOTA EXTRAORDINARIA","monto":2938.0,"detalle":""},{"id":1700000081000,"fecha":"2025-11-02","tipo":"Gasto","categoria":"OTROS","monto":3900.0,"detalle":"ZARA "},{"id":1700000082000,"fecha":"2025-11-02","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":832.0,"detalle":""},{"id":1700000083000,"fecha":"2025-11-02","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":660.0,"detalle":""},{"id":1700000084000,"fecha":"2025-11-02","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":637.0,"detalle":""},{"id":1700000085000,"fecha":"2025-11-02","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":338.0,"detalle":""},{"id":1700000086000,"fecha":"2025-11-02","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":299.0,"detalle":""},{"id":1700000087000,"fecha":"2025-11-02","tipo":"Gasto","categoria":"OTROS","monto":120.0,"detalle":"HELADO "},{"id":1700000088000,"fecha":"2025-11-03","tipo":"Gasto","categoria":"DENTAL","monto":4500.0,"detalle":""},{"id":1700000089000,"fecha":"2025-11-03","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":4200.0,"detalle":""},{"id":1700000090000,"fecha":"2025-11-03","tipo":"Gasto","categoria":"SEGURO CASA","monto":4002.0,"detalle":""},{"id":1700000091000,"fecha":"2025-11-03","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":1468.73,"detalle":""},{"id":1700000092000,"fecha":"2025-11-03","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":1468.0,"detalle":""},{"id":1700000093000,"fecha":"2025-11-03","tipo":"Gasto","categoria":"MUCHACHA (Maribel)","monto":500.0,"detalle":""},{"id":1700000094000,"fecha":"2025-11-04","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":22527.64,"detalle":"EL SURTIDOR "},{"id":1700000095000,"fecha":"2025-11-04","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":854.05,"detalle":""},{"id":1700000096000,"fecha":"2025-11-04","tipo":"Gasto","categoria":"RESTAURANTE","monto":361.1,"detalle":"YAKUMI"},{"id":1700000097000,"fecha":"2025-11-05","tipo":"Gasto","categoria":"DENTAL","monto":3102.0,"detalle":""},{"id":1700000098000,"fecha":"2025-11-06","tipo":"Gasto","categoria":"SEGURO MÉDICO (Raquel)","monto":2200.0,"detalle":"FISIO "},{"id":1700000099000,"fecha":"2025-11-06","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":1098.65,"detalle":""},{"id":1700000100000,"fecha":"2025-11-06","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":1016.16,"detalle":""},{"id":1700000101000,"fecha":"2025-11-06","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":552.6,"detalle":""},{"id":1700000102000,"fecha":"2025-11-06","tipo":"Gasto","categoria":"MUCHACHA (Maribel)","monto":500.0,"detalle":""},{"id":1700000103000,"fecha":"2025-11-10","tipo":"Gasto","categoria":"SAT / CONTABILIDAD (SHEEP)","monto":580.0,"detalle":""},{"id":1700000104000,"fecha":"2025-11-12","tipo":"Gasto","categoria":"OTROS","monto":1200.0,"detalle":""},{"id":1700000105000,"fecha":"2025-11-13","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":1021.0,"detalle":""},{"id":1700000106000,"fecha":"2025-11-13","tipo":"Gasto","categoria":"MUCHACHA (Maribel)","monto":500.0,"detalle":""},{"id":1700000107000,"fecha":"2025-11-13","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":1016.0,"detalle":"iluminacion y contacto "},{"id":1700000108000,"fecha":"2025-11-14","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":1000.0,"detalle":""},{"id":1700000109000,"fecha":"2025-11-15","tipo":"Gasto","categoria":"OTROS","monto":922.0,"detalle":"FARMACIA "},{"id":1700000110000,"fecha":"2025-11-16","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":107100.0,"detalle":"ESTUDIO Y SALA "},{"id":1700000112000,"fecha":"2025-11-16","tipo":"Gasto","categoria":"OTROS","monto":669.0,"detalle":"garmin"},{"id":1700000113000,"fecha":"2025-11-17","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":79100.0,"detalle":"MESA COMEDOR "},{"id":1700000114000,"fecha":"2025-11-17","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":659.0,"detalle":""},{"id":1700000115000,"fecha":"2025-11-18","tipo":"Gasto","categoria":"GASOLINA / VIATICOS","monto":600.0,"detalle":"tag"},{"id":1700000116000,"fecha":"2025-11-19","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":21599.0,"detalle":"SAMSUNG TELE 65"},{"id":1700000117000,"fecha":"2025-11-19","tipo":"Gasto","categoria":"GASOLINA / VIATICOS","monto":600.0,"detalle":"gasolin a"},{"id":1700000118000,"fecha":"2025-11-20","tipo":"Gasto","categoria":"OTROS","monto":355.0,"detalle":"dazn"},{"id":1700000119000,"fecha":"2025-11-21","tipo":"Gasto","categoria":"OTROS","monto":289.0,"detalle":"LINDT"},{"id":1700000120000,"fecha":"2025-11-22","tipo":"Gasto","categoria":"GASOLINA / VIATICOS","monto":150.0,"detalle":"tag"},{"id":1700000121000,"fecha":"2025-11-23","tipo":"Gasto","categoria":"OTROS","monto":1716.0,"detalle":"RESTAURANTE "},{"id":1700000122000,"fecha":"2025-11-23","tipo":"Gasto","categoria":"GASOLINA / VIATICOS","monto":1500.0,"detalle":"LICENCIA "},{"id":1700000123000,"fecha":"2025-11-23","tipo":"Gasto","categoria":"OTROS","monto":654.0,"detalle":"CINE "},{"id":1700000124000,"fecha":"2025-11-23","tipo":"Gasto","categoria":"OTROS","monto":639.4,"detalle":"YAKUMI "},{"id":1700000125000,"fecha":"2025-11-23","tipo":"Gasto","categoria":"OTROS","monto":156.0,"detalle":"ESTCIONAMINTO "},{"id":1700000126000,"fecha":"2025-11-25","tipo":"Gasto","categoria":"MTTO CASA (mantenimiento)","monto":11515.0,"detalle":"CANCELERO "},{"id":1700000127000,"fecha":"2025-11-25","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":5450.0,"detalle":"CASA NOGAL "},{"id":1700000128000,"fecha":"2025-11-26","tipo":"Gasto","categoria":"GAS","monto":1063.32,"detalle":"royal gas "},{"id":1700000129000,"fecha":"2025-11-26","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":1047.0,"detalle":"TIEMPO ARTE "},{"id":1700000130000,"fecha":"2025-11-26","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":4150.0,"detalle":"CANCELERO "},{"id":1700000131000,"fecha":"2025-11-27","tipo":"Gasto","categoria":"OTROS","monto":4400.0,"detalle":"lulu"},{"id":1700000132000,"fecha":"2025-11-27","tipo":"Gasto","categoria":"OTROS","monto":899.0,"detalle":"vanity"},{"id":1700000133000,"fecha":"2025-11-27","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":3555.0,"detalle":"REGADERA"},{"id":1700000134000,"fecha":"2025-11-28","tipo":"Gasto","categoria":"AGUA","monto":2468.0,"detalle":""},{"id":1700000135000,"fecha":"2025-11-29","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":2000.0,"detalle":""},{"id":1700000136000,"fecha":"2025-11-30","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":660.24,"detalle":""},{"id":1700000137000,"fecha":"2025-11-30","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":2000.0,"detalle":""},{"id":1700000138000,"fecha":"2025-12-10","tipo":"Gasto","categoria":"MTTO CASA (mantenimiento)","monto":12694.0,"detalle":""},{"id":1700000139000,"fecha":"2025-12-10","tipo":"Gasto","categoria":"CUOTA EXTRAORDINARIA","monto":2938.0,"detalle":""},{"id":1700000140000,"fecha":"2025-12-15","tipo":"Ingreso","categoria":"EMPLEO / INGRESO","monto":157527.08,"detalle":""},{"id":1700000141000,"fecha":"2025-12-03","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":8998.8,"detalle":"WEST ELM"},{"id":1700000142000,"fecha":"2025-12-03","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":4889.3,"detalle":"WEST ELM"},{"id":1700000143000,"fecha":"2025-12-03","tipo":"Gasto","categoria":"OTROS","monto":4877.6,"detalle":"ESPOSA BANANA "},{"id":1700000144000,"fecha":"2025-11-30","tipo":"Gasto","categoria":"OTROS","monto":3678.0,"detalle":"SOLEDAD VALLE"},{"id":1700000145000,"fecha":"2025-11-30","tipo":"Gasto","categoria":"GASOLINA / VIATICOS","monto":736.91,"detalle":"GASOLINA "},{"id":1700000146000,"fecha":"2025-11-30","tipo":"Gasto","categoria":"OTROS","monto":668.0,"detalle":"CAFÉ VALLE"},{"id":1700000147000,"fecha":"2025-12-03","tipo":"Gasto","categoria":"OTROS","monto":8500.0,"detalle":"vanity "},{"id":1700000148000,"fecha":"2025-12-08","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":281530.0,"detalle":"ENGANCHE "},{"id":1700000149000,"fecha":"2025-12-09","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":535.0,"detalle":""},{"id":1700000150000,"fecha":"2025-12-06","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":1288.0,"detalle":""},{"id":1700000151000,"fecha":"2025-12-08","tipo":"Gasto","categoria":"MUCHACHA (Maribel)","monto":500.0,"detalle":""},{"id":1700000152000,"fecha":"2025-12-11","tipo":"Gasto","categoria":"MUCHACHA (Maribel)","monto":500.0,"detalle":""},{"id":1700000153000,"fecha":"2025-12-11","tipo":"Gasto","categoria":"OTROS","monto":2500.0,"detalle":"carga de mesa pin pon "},{"id":1700000154000,"fecha":"2025-12-10","tipo":"Gasto","categoria":"OTROS","monto":2875.0,"detalle":""},{"id":1700000155000,"fecha":"2025-12-10","tipo":"Gasto","categoria":"OTROS","monto":53.0,"detalle":"ESTACIONAINETO "},{"id":1700000156000,"fecha":"2025-12-15","tipo":"Gasto","categoria":"MUCHACHA (Maribel)","monto":500.0,"detalle":""},{"id":1700000157000,"fecha":"2025-12-12","tipo":"Gasto","categoria":"OTROS","monto":1200.0,"detalle":""},{"id":1700000158000,"fecha":"2025-12-11","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":3000.0,"detalle":"LEVANTAMINTO DE MESA "},{"id":1700000159000,"fecha":"2025-12-11","tipo":"Gasto","categoria":"MUCHACHA (Maribel)","monto":500.0,"detalle":""},{"id":1700000160000,"fecha":"2025-12-15","tipo":"Gasto","categoria":"ESPOSA (Raquel)","monto":17000.0,"detalle":""},{"id":1700000161000,"fecha":"2025-12-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":1700000162000,"fecha":"2025-12-15","tipo":"Gasto","categoria":"SAT / CONTABILIDAD (SHEEP)","monto":1044.0,"detalle":""},{"id":1700000163000,"fecha":"2026-01-14","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":1700000164000,"fecha":"2026-01-01","tipo":"Gasto","categoria":"PREDIAL","monto":8143.0,"detalle":""},{"id":1700000165000,"fecha":"2026-01-02","tipo":"Gasto","categoria":"MANTENIMIENTO COCHES","monto":6342.0,"detalle":""},{"id":1700000166000,"fecha":"2026-01-01","tipo":"Gasto","categoria":"AGUA","monto":1198.0,"detalle":""},{"id":1700000167000,"fecha":"2026-01-05","tipo":"Gasto","categoria":"TELEMEX / Internet","monto":349.0,"detalle":""},{"id":1700000168000,"fecha":"2026-01-15","tipo":"Ingreso","categoria":"EMPLEO / INGRESO","monto":98879.13,"detalle":""},{"id":1700000171000,"fecha":"2026-01-26","tipo":"Gasto","categoria":"MUCHACHA (Maribel)","monto":500.0,"detalle":""},{"id":1700000172000,"fecha":"2026-01-24","tipo":"Gasto","categoria":"OTROS","monto":1500.0,"detalle":""},{"id":1700000173000,"fecha":"2026-01-15","tipo":"Gasto","categoria":"OTROS","monto":1408.0,"detalle":""},{"id":1700000174000,"fecha":"2026-01-25","tipo":"Gasto","categoria":"DENTAL","monto":6850.0,"detalle":""},{"id":1700000175000,"fecha":"2025-12-29","tipo":"Gasto","categoria":"LUZ","monto":179.0,"detalle":""},{"id":1700000176000,"fecha":"2026-01-22","tipo":"Gasto","categoria":"AMAZON/MERCADO LIBRE/RAPPI","monto":999.0,"detalle":""},{"id":1700000177000,"fecha":"2026-01-23","tipo":"Gasto","categoria":"AMAZON/MERCADO LIBRE/RAPPI","monto":413.45,"detalle":""},{"id":1700000178000,"fecha":"2026-01-24","tipo":"Gasto","categoria":"AMAZON/MERCADO LIBRE/RAPPI","monto":1411.0,"detalle":""},{"id":1700000179000,"fecha":"2026-01-25","tipo":"Gasto","categoria":"AMAZON/MERCADO LIBRE/RAPPI","monto":563.0,"detalle":""},{"id":1700000180000,"fecha":"2026-01-26","tipo":"Gasto","categoria":"AT&T TELÉFONO","monto":579.0,"detalle":""},{"id":1700000181000,"fecha":"2026-01-16","tipo":"Gasto","categoria":"ESPOSA (Raquel)","monto":15000.0,"detalle":""},{"id":1700000182000,"fecha":"2026-01-27","tipo":"Gasto","categoria":"DOCTORES","monto":2900.0,"detalle":""},{"id":1700000183000,"fecha":"2026-01-22","tipo":"Gasto","categoria":"MUCHACHA (Maribel)","monto":500.0,"detalle":""},{"id":1700000184000,"fecha":"2026-02-01","tipo":"Gasto","categoria":"TELEMEX / Internet","monto":349.0,"detalle":""},{"id":1700000185000,"fecha":"2026-03-02","tipo":"Gasto","categoria":"TELEMEX / Internet","monto":349.0,"detalle":""},{"id":1700000196000,"fecha":"2026-01-21","tipo":"Gasto","categoria":"SAT / CONTABILIDAD (SHEEP)","monto":1299.0,"detalle":""},{"id":1700000197000,"fecha":"2026-01-20","tipo":"Gasto","categoria":"SAT / CONTABILIDAD (SHEEP)","monto":580.0,"detalle":""},{"id":1700000198000,"fecha":"2026-02-02","tipo":"Gasto","categoria":"OTROS","monto":2730.0,"detalle":""},{"id":1700000199000,"fecha":"2026-02-02","tipo":"Gasto","categoria":"OTROS","monto":80.0,"detalle":""},{"id":1700000200000,"fecha":"2026-02-02","tipo":"Gasto","categoria":"OTROS","monto":787.0,"detalle":""},{"id":1700000201000,"fecha":"2026-02-02","tipo":"Gasto","categoria":"OTROS","monto":127.0,"detalle":""},{"id":1700000202000,"fecha":"2026-02-02","tipo":"Gasto","categoria":"OTROS","monto":1599.0,"detalle":""},{"id":1700000203000,"fecha":"2026-02-02","tipo":"Gasto","categoria":"OTROS","monto":3850.0,"detalle":""},{"id":1700000204000,"fecha":"2026-02-02","tipo":"Gasto","categoria":"OTROS","monto":1481.0,"detalle":""},{"id":1700000205000,"fecha":"2026-02-02","tipo":"Gasto","categoria":"OTROS","monto":3710.0,"detalle":""},{"id":1700000206000,"fecha":"2026-02-01","tipo":"Gasto","categoria":"OTROS","monto":1588.0,"detalle":""},{"id":1700000207000,"fecha":"2026-01-30","tipo":"Gasto","categoria":"OTROS","monto":238.0,"detalle":""},{"id":1700000208000,"fecha":"2026-02-16","tipo":"Gasto","categoria":"LUZ","monto":197.0,"detalle":""},{"id":1700000209000,"fecha":"2026-02-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.04,"detalle":""},{"id":1700000210000,"fecha":"2026-03-01","tipo":"Gasto","categoria":"OTROS","monto":406.0,"detalle":"depor oakberry"},{"id":1700000211000,"fecha":"2026-03-01","tipo":"Gasto","categoria":"OTROS","monto":400.0,"detalle":"aviv "},{"id":1700000212000,"fecha":"2026-02-28","tipo":"Gasto","categoria":"OTROS","monto":1625.0,"detalle":""},{"id":1700000213000,"fecha":"2026-03-06","tipo":"Gasto","categoria":"OTROS","monto":5200.0,"detalle":""},{"id":1700000214000,"fecha":"2026-03-08","tipo":"Gasto","categoria":"OTROS","monto":149.0,"detalle":""},{"id":1700000215000,"fecha":"2026-03-06","tipo":"Gasto","categoria":"GAS","monto":1089.0,"detalle":""},{"id":1700000216000,"fecha":"2026-02-14","tipo":"Ingreso","categoria":"EMPLEO / INGRESO","monto":99711.8,"detalle":""},{"id":1700000217000,"fecha":"2026-03-15","tipo":"Ingreso","categoria":"EMPLEO / INGRESO","monto":98046.67,"detalle":""},{"id":1700000218000,"fecha":"2026-03-16","tipo":"Gasto","categoria":"ESPOSA (Raquel)","monto":25000.0,"detalle":""},{"id":1700000219000,"fecha":"2026-03-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":1700000220000,"fecha":"2026-02-28","tipo":"Gasto","categoria":"MTTO CASA (mantenimiento)","monto":12694.0,"detalle":""},{"id":1700000221000,"fecha":"2026-03-06","tipo":"Gasto","categoria":"PALACIO DE HIERRO","monto":65815.0,"detalle":""},{"id":1700000222000,"fecha":"2026-04-06","tipo":"Gasto","categoria":"PALACIO DE HIERRO","monto":6645.0,"detalle":""},{"id":1800000000000,"fecha":"2026-03-15","tipo":"Gasto","categoria":"RAPPI / UBER EATS","monto":984.0,"detalle":"Rappi - Amex"},{"id":1800000001000,"fecha":"2026-03-17","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":1199.96,"detalle":"Samsung cargo 05/18 - Amex"},{"id":1800000002000,"fecha":"2026-03-17","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":199.0,"detalle":"Amazon - Amex"},{"id":1800000003000,"fecha":"2026-03-17","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":105.0,"detalle":"Amazon - Amex"},{"id":1800000004000,"fecha":"2026-03-17","tipo":"Gasto","categoria":"SEGURO CASA","monto":10061.57,"detalle":"Zurich seguros daño - Amex"},{"id":1800000005000,"fecha":"2026-03-17","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":1210.5,"detalle":"Amazon - Amex"},{"id":1800000006000,"fecha":"2026-03-17","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":1105.66,"detalle":"Amazon - Amex"},{"id":1800000007000,"fecha":"2026-03-17","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":520.83,"detalle":"Amazon MSI cargo 9/12 - Amex"},{"id":1800000008000,"fecha":"2026-03-18","tipo":"Gasto","categoria":"ESPOSA (Raquel)","monto":1439.14,"detalle":"Tienda online Raquel - Amex"},{"id":1800000009000,"fecha":"2026-03-19","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":419.0,"detalle":"Amazon - Amex"},{"id":1800000010000,"fecha":"2026-03-19","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":169.0,"detalle":"Amazon - Amex"},{"id":1800000011000,"fecha":"2026-03-19","tipo":"Gasto","categoria":"ROPA / ZARA","monto":1599.0,"detalle":"Dportenis - Amex"},{"id":1800000012000,"fecha":"2026-03-20","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":3468.0,"detalle":"Amazon - Amex"},{"id":1800000013000,"fecha":"2026-03-22","tipo":"Gasto","categoria":"AT&T TELÉFONO","monto":579.0,"detalle":"AT&T - Amex"},{"id":1800000014000,"fecha":"2026-03-22","tipo":"Gasto","categoria":"ROPA / ZARA","monto":1290.0,"detalle":"Hollister - Amex"},{"id":1800000015000,"fecha":"2026-03-22","tipo":"Gasto","categoria":"ROPA / ZARA","monto":5294.0,"detalle":"Zara - Amex"},{"id":1800000016000,"fecha":"2026-03-22","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":562.74,"detalle":"Amazon - Amex"},{"id":1800000017000,"fecha":"2026-03-22","tipo":"Gasto","categoria":"SUPER / DESPENSA","monto":3139.77,"detalle":"KosherClick - Amex"},{"id":1800000018000,"fecha":"2026-03-23","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":196.12,"detalle":"Amazon - Amex"},{"id":1800000019000,"fecha":"2026-03-23","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":756.1,"detalle":"Amazon - Amex"},{"id":1800000020000,"fecha":"2026-03-23","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":237.0,"detalle":"Amazon - Amex"},{"id":1800000021000,"fecha":"2026-03-23","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":1027.41,"detalle":"Amazon - Amex"},{"id":1800000022000,"fecha":"2026-03-24","tipo":"Gasto","categoria":"GASOLINA / VIATICOS","monto":700.0,"detalle":"Pase TAG - Amex"},{"id":1800000023000,"fecha":"2026-03-25","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":379.0,"detalle":"Amazon - Amex"},{"id":1800000024000,"fecha":"2026-03-25","tipo":"Gasto","categoria":"APPLE","monto":49.0,"detalle":"Apple.com - Amex"},{"id":1800000025000,"fecha":"2026-03-25","tipo":"Gasto","categoria":"RESTAURANTE","monto":527.85,"detalle":"Yakkumi Raquel - Amex"},{"id":1800000026000,"fecha":"2026-03-27","tipo":"Gasto","categoria":"OTROS","monto":40.0,"detalle":"Parco - estacionamiento"},{"id":1800000027000,"fecha":"2026-03-27","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":540.0,"detalle":"Amazon - Amex"},{"id":1800000028000,"fecha":"2026-03-27","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":685.0,"detalle":"Amazon - Amex"},{"id":1800000029000,"fecha":"2026-03-27","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":229.0,"detalle":"Amazon - Amex"},{"id":1800000030000,"fecha":"2026-03-27","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":516.09,"detalle":"Amazon - Amex"},{"id":1800000031000,"fecha":"2026-03-28","tipo":"Gasto","categoria":"RAPPI / UBER EATS","monto":576.23,"detalle":"Rappi - Amex"},{"id":1800000032000,"fecha":"2026-03-29","tipo":"Gasto","categoria":"OTROS","monto":140.0,"detalle":"Parco - estacionamiento"},{"id":1800000033000,"fecha":"2026-03-29","tipo":"Gasto","categoria":"OTROS","monto":71.0,"detalle":"Parco - estacionamiento"},{"id":1800000034000,"fecha":"2026-03-29","tipo":"Gasto","categoria":"ROPA / ZARA","monto":2995.0,"detalle":"Massimo Dutti - Amex"},{"id":1800000035000,"fecha":"2026-03-29","tipo":"Gasto","categoria":"OTROS COMERCIOS","monto":8740.0,"detalle":"Exalta Hero - Amex"},{"id":1800000036000,"fecha":"2026-03-29","tipo":"Gasto","categoria":"UBER / TAXI","monto":70.0,"detalle":"Uber - Amex"},{"id":1800000037000,"fecha":"2026-03-29","tipo":"Gasto","categoria":"RAPPI / UBER EATS","monto":69.0,"detalle":"Rappi Prime - Amex"},{"id":1800000038000,"fecha":"2026-03-29","tipo":"Gasto","categoria":"SUPER / DESPENSA","monto":2639.0,"detalle":"KosherClick - Amex"},{"id":1800000039000,"fecha":"2026-03-30","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":331.0,"detalle":"Amazon - Amex"},{"id":1800000040000,"fecha":"2026-03-31","tipo":"Gasto","categoria":"RAPPI / UBER EATS","monto":961.4,"detalle":"Rappi - Amex"},{"id":1800000041000,"fecha":"2026-04-01","tipo":"Gasto","categoria":"RENTA DE COCHE","monto":5203.05,"detalle":"Avis - renta coche Vallarta"},{"id":1800000042000,"fecha":"2026-04-04","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":1524.37,"detalle":"Amazon - Amex"},{"id":1800000043000,"fecha":"2026-04-04","tipo":"Gasto","categoria":"OTROS COMERCIOS","monto":109.57,"detalle":"Oura Ring - Amex"},{"id":1800000044000,"fecha":"2026-04-05","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":649.0,"detalle":"Amazon - Amex"},{"id":1800000045000,"fecha":"2026-04-05","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":6499.0,"detalle":"Amazon - Amex"},{"id":1800000046000,"fecha":"2026-04-06","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":632.38,"detalle":"Amazon - Amex"},{"id":1800000047000,"fecha":"2026-04-07","tipo":"Gasto","categoria":"RAPPI / UBER EATS","monto":371.8,"detalle":"Rappi - Amex"},{"id":1800000048000,"fecha":"2026-04-10","tipo":"Gasto","categoria":"SAT / CONTABILIDAD (SHEEP)","monto":604.0,"detalle":"Sheep - Amex"},{"id":1800000049000,"fecha":"2026-04-14","tipo":"Gasto","categoria":"TELEMEX / Internet","monto":349.0,"detalle":"Telmex - Amex"},{"id":1800000050000,"fecha":"2026-04-14","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":100.01,"detalle":"Amazon - Amex"},{"id":1800000051000,"fecha":"2026-04-15","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":999.01,"detalle":"Amazon - Amex"},{"id":1800000052000,"fecha":"2026-04-15","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":365.16,"detalle":"Amazon - Amex"},{"id":1800000053000,"fecha":"2026-04-15","tipo":"Gasto","categoria":"OTROS","monto":43.0,"detalle":"Parco - estacionamiento"},{"id":1800000054000,"fecha":"2026-04-15","tipo":"Gasto","categoria":"OTROS","monto":46.0,"detalle":"Parco - estacionamiento"},{"id":1800000055000,"fecha":"2026-04-15","tipo":"Gasto","categoria":"SUPER / DESPENSA","monto":563.75,"detalle":"Kosherits - Amex"},{"id":1900000000000,"fecha":"2026-04-18","tipo":"Gasto","categoria":"OTROS COMERCIOS","monto":9131.0,"detalle":"Shohop - ropa"},{"id":1900000001000,"fecha":"2026-04-15","tipo":"Gasto","categoria":"AT&T TELÉFONO","monto":579.0,"detalle":"AT&T Lite 3 - factura Apr"},{"id":1900000002000,"fecha":"2026-04-14","tipo":"Gasto","categoria":"LUZ","monto":207.0,"detalle":"CFE bimestral Feb-Abr"},{"id":1800000056000,"fecha":"2026-04-16","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":847.38,"detalle":"Amazon - Amex"},{"id":1900000003000,"fecha":"2026-04-15","tipo":"Ingreso","categoria":"EMPLEO / INGRESO","monto":103042.47,"detalle":""},{"id":1900000004000,"fecha":"2026-04-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":1900000005000,"fecha":"2026-04-16","tipo":"Gasto","categoria":"ESPOSA (Raquel)","monto":15000.0,"detalle":""},{"id":2000000000000,"fecha":"2026-05-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":2000000001000,"fecha":"2026-06-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":2000000002000,"fecha":"2026-07-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":2000000003000,"fecha":"2026-08-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":2000000004000,"fecha":"2026-09-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":2000000005000,"fecha":"2026-10-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":2000000006000,"fecha":"2026-11-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":2000000007000,"fecha":"2026-12-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":2000000008000,"fecha":"2027-01-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":2000000009000,"fecha":"2027-02-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":2000000010000,"fecha":"2027-03-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":2000000011000,"fecha":"2027-04-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":2000000012000,"fecha":"2027-05-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":2000000013000,"fecha":"2027-06-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":2000000014000,"fecha":"2027-07-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":2000000015000,"fecha":"2027-08-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":2000000016000,"fecha":"2027-09-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":2000000017000,"fecha":"2027-10-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":2000000018000,"fecha":"2027-11-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":1900000010000,"fecha":"2026-03-13","tipo":"Gasto","categoria":"GYM / DEPORTE","monto":958.0,"detalle":"F 119 STIM MEXICO - Gold"},{"id":1900000011000,"fecha":"2026-03-14","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":816.5,"detalle":"ZTL*DANIEL WELLINGTON CUAJIMALPA DE M - Gold"},{"id":1900000012000,"fecha":"2026-03-16","tipo":"Gasto","categoria":"RESTAURANTE","monto":1921.7,"detalle":"HUNAN ARTZ MEXICO - Gold"},{"id":1900000013000,"fecha":"2026-03-16","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":1596.0,"detalle":"UGG ARTZ SM MEXICO - Gold"},{"id":1900000014000,"fecha":"2026-03-16","tipo":"Gasto","categoria":"RESTAURANTE","monto":250.0,"detalle":"MITPOLO*REST ARTZ MYKA CIUDAD DE MEX - Gold"},{"id":1900000015000,"fecha":"2026-03-16","tipo":"Gasto","categoria":"RESTAURANTE","monto":3748.0,"detalle":"BROWNIE ARTZ MEXICO - Gold"},{"id":1900000017000,"fecha":"2026-03-18","tipo":"Gasto","categoria":"COMIDA A DOMICILIO / SÚPER","monto":1120.1,"detalle":"BILLPOCKET*YAKKUMI DEB1 CUAJIMALPA DE - Gold"},{"id":1900000019000,"fecha":"2026-03-21","tipo":"Gasto","categoria":"COMIDA A DOMICILIO / SÚPER","monto":981.2,"detalle":"BILLPOCKET*YAKKUMI DEB1 CUAJIMALPA DE - Gold"},{"id":1900000020000,"fecha":"2026-03-22","tipo":"Gasto","categoria":"RESTAURANTE","monto":153.0,"detalle":"NETPAY*AMORINO DELTA AV Ciudad De Mexic - Gold"},{"id":1900000021000,"fecha":"2026-03-22","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":4658.0,"detalle":"*SCAPPINO PARQUE DELTA BENITO JUAREZ - Gold"},{"id":1900000022000,"fecha":"2026-03-22","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":2003.0,"detalle":"MANGO SANTA FE SM MEXICO - Gold"},{"id":1900000023000,"fecha":"2026-03-22","tipo":"Gasto","categoria":"OTROS","monto":1430.17,"detalle":"OPERADORA DE SERVICIOS MEXICO - Gold"},{"id":1900000024000,"fecha":"2026-03-24","tipo":"Gasto","categoria":"BELLEZA / BARBERÍA","monto":390.0,"detalle":"HOM ALTA PELUQUERIA HUIXQUILUCAN - Gold"},{"id":1900000025000,"fecha":"2026-03-24","tipo":"Gasto","categoria":"RESTAURANTE","monto":33.0,"detalle":"KRISPY KREME KK LERMA LERMA EM - Gold"},{"id":1900000026000,"fecha":"2026-03-25","tipo":"Gasto","categoria":"SALUD","monto":134.4,"detalle":"HOSPITAL ANGELES LOMAS HUIXQUILUCAN DE - Gold"},{"id":1900000027000,"fecha":"2026-03-25","tipo":"Gasto","categoria":"SALUD","monto":1600.0,"detalle":"DRA REGAN ANGELA HUIXQUILUCAN - Gold"},{"id":1900000028000,"fecha":"2026-03-28","tipo":"Gasto","categoria":"RESTAURANTE","monto":1368.5,"detalle":"SCOOZI RISTORANTE CUAJIMALPA - Gold"},{"id":1900000029000,"fecha":"2026-03-29","tipo":"Gasto","categoria":"APPS (Uber/Rappi/etc)","monto":52.75,"detalle":"DRIVEAPP ALVARO OBREGON - Gold"},{"id":1900000030000,"fecha":"2026-03-29","tipo":"Gasto","categoria":"OTROS","monto":255.0,"detalle":"INTERLOMAS CAR WASH 000 HUIXQUILUCAN - Gold"},{"id":1900000031000,"fecha":"2026-03-30","tipo":"Gasto","categoria":"OTROS","monto":602.0,"detalle":"FARM PVR CONOS OLAS AL PUERTO VALLAR - Gold"},{"id":1900000033000,"fecha":"2026-03-30","tipo":"Gasto","categoria":"RESTAURANTE","monto":48.0,"detalle":"KRISPY KREME KRISPY KRE ZUMPANGO - Gold"},{"id":1900000034000,"fecha":"2026-03-31","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":1359.0,"detalle":"RIP CURL BAHIA DE BAND - Gold"},{"id":1900000035000,"fecha":"2026-03-31","tipo":"Gasto","categoria":"SALUD","monto":126.0,"detalle":"FARMACIA PV BAHIA DE BAND - Gold"},{"id":1900000036000,"fecha":"2026-03-31","tipo":"Gasto","categoria":"OTROS COMERCIOS","monto":2000.0,"detalle":"MERCADOPAGO*ANNCLA Bah?a De Band - Gold"},{"id":1900000037000,"fecha":"2026-04-01","tipo":"Gasto","categoria":"GASOLINA / VIÁTICOS","monto":793.56,"detalle":"GASOLINER ORO VALLARTA PUERTO VALLAR - Gold"},{"id":1900000038000,"fecha":"2026-04-05","tipo":"Gasto","categoria":"OTROS COMERCIOS","monto":520.0,"detalle":"MERCADO LIBRE MEXICO - Gold"},{"id":1900000039000,"fecha":"2026-04-11","tipo":"Gasto","categoria":"OTROS COMERCIOS","monto":499.67,"detalle":"MERCADO LIBRE MEXICO - Gold"},{"id":1900000040000,"fecha":"2026-04-12","tipo":"Gasto","categoria":"RESTAURANTE","monto":370.0,"detalle":"REST CAFFE LUCCA VALLE DE BRAVO - Gold"},{"id":1900000041000,"fecha":"2026-03-18","tipo":"Gasto","categoria":"RESTAURANTE","monto":100.0,"detalle":"PAMBA FOODS PAMBA FOODS MIGUEL HIDALGO - Gold"},{"id":1900000042000,"fecha":"2026-03-20","tipo":"Gasto","categoria":"RESTAURANTE","monto":275.0,"detalle":"REST LATTE AND LATTA HUIXQUILUCAN - Gold"},{"id":1900000043000,"fecha":"2026-03-25","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":5912.0,"detalle":"SEPHORA SANTA FE IC CIUDAD DE MEXIC - Gold"},{"id":2200000000000,"fecha":"2026-06-01","tipo":"Gasto","categoria":"SEGURO SALUD (Bupa MSI)","monto":6783.58,"detalle":"Bupa 1/4 - MSI 1/3"},{"id":2200000001000,"fecha":"2026-07-01","tipo":"Gasto","categoria":"SEGURO SALUD (Bupa MSI)","monto":6783.58,"detalle":"Bupa 1/4 - MSI 2/3"},{"id":2200000002000,"fecha":"2026-08-01","tipo":"Gasto","categoria":"SEGURO SALUD (Bupa MSI)","monto":6783.59,"detalle":"Bupa 1/4 - MSI 3/3"},{"id":2200000003000,"fecha":"2026-08-01","tipo":"Gasto","categoria":"SEGURO SALUD (Bupa MSI)","monto":6421.08,"detalle":"Bupa 2/4 - MSI 1/3"},{"id":2200000004000,"fecha":"2026-09-01","tipo":"Gasto","categoria":"SEGURO SALUD (Bupa MSI)","monto":6421.08,"detalle":"Bupa 2/4 - MSI 2/3"},{"id":2200000005000,"fecha":"2026-10-01","tipo":"Gasto","categoria":"SEGURO SALUD (Bupa MSI)","monto":6421.09,"detalle":"Bupa 2/4 - MSI 3/3"},{"id":2200000006000,"fecha":"2026-11-01","tipo":"Gasto","categoria":"SEGURO SALUD (Bupa MSI)","monto":6421.08,"detalle":"Bupa 3/4 - MSI 1/3"},{"id":2200000007000,"fecha":"2026-12-01","tipo":"Gasto","categoria":"SEGURO SALUD (Bupa MSI)","monto":6421.08,"detalle":"Bupa 3/4 - MSI 2/3"},{"id":2200000008000,"fecha":"2027-01-01","tipo":"Gasto","categoria":"SEGURO SALUD (Bupa MSI)","monto":6421.09,"detalle":"Bupa 3/4 - MSI 3/3"},{"id":2200000009000,"fecha":"2027-02-01","tipo":"Gasto","categoria":"SEGURO SALUD (Bupa MSI)","monto":6421.08,"detalle":"Bupa 4/4 - MSI 1/3"},{"id":2200000010000,"fecha":"2027-03-01","tipo":"Gasto","categoria":"SEGURO SALUD (Bupa MSI)","monto":6421.08,"detalle":"Bupa 4/4 - MSI 2/3"},{"id":2200000011000,"fecha":"2027-04-01","tipo":"Gasto","categoria":"SEGURO SALUD (Bupa MSI)","monto":6421.09,"detalle":"Bupa 4/4 - MSI 3/3"},{"id":2300000000000,"fecha":"2026-05-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":736.67,"detalle":"Shopbop.com Gold MSI 1/3"},{"id":2300000001000,"fecha":"2026-06-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":736.67,"detalle":"Shopbop.com Gold MSI 2/3"},{"id":2300000002000,"fecha":"2026-07-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":736.68,"detalle":"Shopbop.com Gold MSI 3/3"},{"id":2400000000000,"fecha":"2026-04-18","tipo":"Gasto","categoria":"INVERSIONES","monto":20000.0,"detalle":"Instalación cargador eléctrico - Efectivo"},{"id":2400000001000,"fecha":"2026-04-18","tipo":"Gasto","categoria":"INVERSIONES","monto":20000.0,"detalle":"Instalación cargador eléctrico - Transferencia"},{"id":2400000002000,"fecha":"2026-04-21","tipo":"Gasto","categoria":"INVERSIONES","monto":3600.0,"detalle":"Extensión cargador - Amazon Amex"},{"id":2500000000000,"fecha":"2026-04-21","tipo":"Gasto","categoria":"GYM / DEPORTE","monto":4800.0,"detalle":"Maestro Gym (6 clases × 2 personas) - Transferencia Banamex"},{"id":2500000001000,"fecha":"2026-05-01","tipo":"Gasto","categoria":"GYM / DEPORTE","monto":6400.0,"detalle":"Maestro Gym (8 clases × 2 personas) - Transferencia"},{"id":2500000002000,"fecha":"2026-06-01","tipo":"Gasto","categoria":"GYM / DEPORTE","monto":6400.0,"detalle":"Maestro Gym (8 clases × 2 personas) - Transferencia"},{"id":2500000003000,"fecha":"2026-07-01","tipo":"Gasto","categoria":"GYM / DEPORTE","monto":6400.0,"detalle":"Maestro Gym (8 clases × 2 personas) - Transferencia"},{"id":2500000004000,"fecha":"2026-08-01","tipo":"Gasto","categoria":"GYM / DEPORTE","monto":6400.0,"detalle":"Maestro Gym (8 clases × 2 personas) - Transferencia"},{"id":2500000005000,"fecha":"2026-09-01","tipo":"Gasto","categoria":"GYM / DEPORTE","monto":6400.0,"detalle":"Maestro Gym (8 clases × 2 personas) - Transferencia"},{"id":2500000006000,"fecha":"2026-10-01","tipo":"Gasto","categoria":"GYM / DEPORTE","monto":6400.0,"detalle":"Maestro Gym (8 clases × 2 personas) - Transferencia"},{"id":2500000007000,"fecha":"2026-11-01","tipo":"Gasto","categoria":"GYM / DEPORTE","monto":6400.0,"detalle":"Maestro Gym (8 clases × 2 personas) - Transferencia"},{"id":2500000008000,"fecha":"2026-12-01","tipo":"Gasto","categoria":"GYM / DEPORTE","monto":6400.0,"detalle":"Maestro Gym (8 clases × 2 personas) - Transferencia"},{"id":2700000000000,"fecha":"2026-04-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":1399.77,"detalle":"Salomon Gold - MSI 1/3"},{"id":2700000001000,"fecha":"2026-05-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":1399.77,"detalle":"Salomon Gold - MSI 2/3"},{"id":2700000002000,"fecha":"2026-06-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":1399.7600000000002,"detalle":"Salomon Gold - MSI 3/3"},{"id":2600000000000,"fecha":"2026-04-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":689.17,"detalle":"Ulta Beauty Gold - MSI 1/6"},{"id":2600000001000,"fecha":"2026-05-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":689.17,"detalle":"Ulta Beauty Gold - MSI 2/6"},{"id":2600000002000,"fecha":"2026-06-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":689.17,"detalle":"Ulta Beauty Gold - MSI 3/6"},{"id":2600000003000,"fecha":"2026-07-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":689.17,"detalle":"Ulta Beauty Gold - MSI 4/6"},{"id":2600000004000,"fecha":"2026-08-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":689.17,"detalle":"Ulta Beauty Gold - MSI 5/6"},{"id":2600000005000,"fecha":"2026-09-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":689.1600000000003,"detalle":"Ulta Beauty Gold - MSI 6/6"},{"id":2800000000000,"fecha":"2025-11-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":816.5,"detalle":"Daniel Wellington - MSI 1/6"},{"id":2800000001000,"fecha":"2025-12-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":816.5,"detalle":"Daniel Wellington - MSI 2/6"},{"id":2800000002000,"fecha":"2026-01-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":816.5,"detalle":"Daniel Wellington - MSI 3/6"},{"id":2800000003000,"fecha":"2026-02-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":816.5,"detalle":"Daniel Wellington - MSI 4/6"},{"id":2800000004000,"fecha":"2026-03-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":816.5,"detalle":"Daniel Wellington - MSI 5/6"},{"id":2800000005000,"fecha":"2026-04-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":816.5,"detalle":"Daniel Wellington - MSI 6/6"},{"id":2900000000000,"fecha":"2026-04-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":730.0,"detalle":"Ben and Frank Gold - MSI 1/3"},{"id":2900000001000,"fecha":"2026-05-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":730.0,"detalle":"Ben and Frank Gold - MSI 2/3"},{"id":2900000002000,"fecha":"2026-06-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":730.0,"detalle":"Ben and Frank Gold - MSI 3/3"},{"id":3000000000000,"fecha":"2025-02-01","tipo":"Gasto","categoria":"GAS","monto":1011.0,"detalle":"Gas LP bimestral"},{"id":3000000001000,"fecha":"2025-03-01","tipo":"Gasto","categoria":"GAS","monto":635.0,"detalle":"Gas LP bimestral"},{"id":3000000002000,"fecha":"2025-04-01","tipo":"Gasto","categoria":"GAS","monto":672.0,"detalle":"Gas LP bimestral"},{"id":3000000003000,"fecha":"2025-05-01","tipo":"Gasto","categoria":"GAS","monto":742.0,"detalle":"Gas LP bimestral"},{"id":3000000004000,"fecha":"2025-06-01","tipo":"Gasto","categoria":"GAS","monto":774.0,"detalle":"Gas LP bimestral"},{"id":3000000005000,"fecha":"2025-07-01","tipo":"Gasto","categoria":"GAS","monto":769.0,"detalle":"Gas LP bimestral"},{"id":3000000006000,"fecha":"2025-08-01","tipo":"Gasto","categoria":"GAS","monto":929.0,"detalle":"Gas LP bimestral"},{"id":3000000007000,"fecha":"2025-09-01","tipo":"Gasto","categoria":"GAS","monto":790.0,"detalle":"Gas LP bimestral"},{"id":3000000008000,"fecha":"2025-10-01","tipo":"Gasto","categoria":"GAS","monto":1063.0,"detalle":"Gas LP bimestral"},{"id":3000000009000,"fecha":"2026-01-01","tipo":"Gasto","categoria":"GAS","monto":796.0,"detalle":"Gas LP bimestral"},{"id":3100000000000,"fecha":"2026-05-01","tipo":"Gasto","categoria":"GAS","monto":850.0,"detalle":"Gas LP bimestral (proyección)"},{"id":3100000001000,"fecha":"2026-07-01","tipo":"Gasto","categoria":"GAS","monto":850.0,"detalle":"Gas LP bimestral (proyección)"},{"id":3100000002000,"fecha":"2026-09-01","tipo":"Gasto","categoria":"GAS","monto":850.0,"detalle":"Gas LP bimestral (proyección)"},{"id":3100000003000,"fecha":"2026-11-01","tipo":"Gasto","categoria":"GAS","monto":850.0,"detalle":"Gas LP bimestral (proyección)"},{"id":3200000000000,"fecha":"9999-12-31","tipo":"Deuda Pendiente","categoria":"MAASER (AISH)","monto":8000.0,"detalle":"Deuda Maaser AISH - Pendiente de pago"},{"id":3300000000000,"fecha":"2026-03-26","tipo":"Gasto","categoria":"DISPOSICION EFECTIVO","monto":707.0,"detalle":"Disposición efectivo Banamex - BancaNet"},{"id":3300000001000,"fecha":"2026-03-26","tipo":"Gasto","categoria":"DISPOSICION EFECTIVO","monto":800.0,"detalle":"Disposición efectivo Banamex - BancaNet"},{"id":3300000002000,"fecha":"2026-03-27","tipo":"Gasto","categoria":"SALUD","monto":187.5,"detalle":"Farmatodo Miramontes - Banamex"},{"id":3300000003000,"fecha":"2026-03-29","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":3001.0,"detalle":"Massimo Dutti Antara - Banamex"},{"id":3300000004000,"fecha":"2026-03-28","tipo":"Gasto","categoria":"SUSCRIPCIONES","monto":129.0,"detalle":"Amazon Audible - Banamex"},{"id":3300000005000,"fecha":"2026-04-07","tipo":"Gasto","categoria":"RESTAURANTE","monto":180.0,"detalle":"Sol en Agua - Banamex"},{"id":3300000006000,"fecha":"2026-04-12","tipo":"Gasto","categoria":"SUSCRIPCIONES","monto":3477.96,"detalle":"Claude.AI Pro USD $200 - Banamex"},{"id":3300000007000,"fecha":"2026-04-07","tipo":"Gasto","categoria":"COMISIONES","monto":555.0,"detalle":"Comisión penalización pago tardío - Banamex"},{"id":3300000008000,"fecha":"2026-04-07","tipo":"Gasto","categoria":"COMISIONES","monto":555.0,"detalle":"Comisión gastos de cobranza - Banamex"},{"id":3400000000000,"fecha":"2026-01-15","tipo":"Gasto","categoria":"SUSCRIPCIONES","monto":999.0,"detalle":"Licencia anual AI (resume juntas) - Tarjeta"},{"id":9900000001000,"fecha":"2026-04-26","tipo":"Gasto","categoria":"TECNOLOGÍA","monto":36799.0,"detalle":"Samsung Galaxy Z Fold 7 Negro 512GB - Contado Amex Platinum"},{"id":9900000002000,"fecha":"2026-05-01","tipo":"MSI","categoria":"TECNOLOGÍA","monto":12266.33,"detalle":"Samsung Galaxy Z Fold 7 - MSI 1/3"},{"id":9900000003000,"fecha":"2026-06-01","tipo":"MSI","categoria":"TECNOLOGÍA","monto":12266.33,"detalle":"Samsung Galaxy Z Fold 7 - MSI 2/3"},{"id":9900000004000,"fecha":"2026-07-01","tipo":"MSI","categoria":"TECNOLOGÍA","monto":12266.34,"detalle":"Samsung Galaxy Z Fold 7 - MSI 3/3 → último"},{"id":9800000000000,"fecha":"2026-01-01","tipo":"Gasto","categoria":"CASA / HOGAR","monto":4000.0,"detalle":"Muchacha entrada por salida (Lun y Jue) - estimado mensual"},{"id":9800000000001,"fecha":"2026-02-01","tipo":"Gasto","categoria":"CASA / HOGAR","monto":4000.0,"detalle":"Muchacha entrada por salida (Lun y Jue) - estimado mensual"},{"id":9800000000002,"fecha":"2026-03-01","tipo":"Gasto","categoria":"CASA / HOGAR","monto":4000.0,"detalle":"Muchacha entrada por salida (Lun y Jue) - estimado mensual"},{"id":9800000000003,"fecha":"2026-04-01","tipo":"Gasto","categoria":"CASA / HOGAR","monto":4000.0,"detalle":"Muchacha entrada por salida (Lun y Jue) - estimado mensual"},{"id":9700000000000,"fecha":"2025-06-09","tipo":"Gasto","categoria":"CASA / HOGAR","monto":2000.0,"detalle":"Muchacha entrada por salida (Lun y Jue) - medio mes"},{"id":9700000001000,"fecha":"2025-07-01","tipo":"Gasto","categoria":"CASA / HOGAR","monto":4000.0,"detalle":"Muchacha entrada por salida (Lun y Jue) - estimado mensual"},{"id":9700000002000,"fecha":"2025-08-01","tipo":"Gasto","categoria":"CASA / HOGAR","monto":4000.0,"detalle":"Muchacha entrada por salida (Lun y Jue) - estimado mensual"},{"id":9700000003000,"fecha":"2025-09-01","tipo":"Gasto","categoria":"CASA / HOGAR","monto":4000.0,"detalle":"Muchacha entrada por salida (Lun y Jue) - estimado mensual"},{"id":9700000004000,"fecha":"2025-10-01","tipo":"Gasto","categoria":"CASA / HOGAR","monto":4000.0,"detalle":"Muchacha entrada por salida (Lun y Jue) - estimado mensual"},{"id":9700000005000,"fecha":"2025-11-01","tipo":"Gasto","categoria":"CASA / HOGAR","monto":4000.0,"detalle":"Muchacha entrada por salida (Lun y Jue) - estimado mensual"},{"id":9700000006000,"fecha":"2025-12-01","tipo":"Gasto","categoria":"CASA / HOGAR","monto":4000.0,"detalle":"Muchacha entrada por salida (Lun y Jue) - estimado mensual"},{"id":9600000001000,"fecha":"2026-04-27","tipo":"Pago","categoria":"PAGO TARJETA","monto":14710.0,"detalle":"Pago Banamex Explora *completo*"},{"id":9500000000000,"fecha":"2025-09-01","tipo":"Gasto","categoria":"SUSCRIPCIONES","monto":3600.0,"detalle":"Pop TV - Transferencia"},{"id":9500000000001,"fecha":"2025-10-01","tipo":"Gasto","categoria":"SUSCRIPCIONES","monto":3600.0,"detalle":"Pop TV - Transferencia"},{"id":9500000000002,"fecha":"2025-11-01","tipo":"Gasto","categoria":"SUSCRIPCIONES","monto":3600.0,"detalle":"Pop TV - Transferencia"},{"id":9500000000003,"fecha":"2025-12-01","tipo":"Gasto","categoria":"SUSCRIPCIONES","monto":3600.0,"detalle":"Pop TV - Transferencia"},{"id":9500000010000,"fecha":"2026-01-01","tipo":"Gasto","categoria":"SUSCRIPCIONES","monto":3600.0,"detalle":"Pop TV - Transferencia"},{"id":9500000010001,"fecha":"2026-02-01","tipo":"Gasto","categoria":"SUSCRIPCIONES","monto":3600.0,"detalle":"Pop TV - Transferencia"},{"id":9500000010002,"fecha":"2026-03-01","tipo":"Gasto","categoria":"SUSCRIPCIONES","monto":3600.0,"detalle":"Pop TV - Transferencia"},{"id":9500000010003,"fecha":"2026-04-01","tipo":"Gasto","categoria":"SUSCRIPCIONES","monto":3600.0,"detalle":"Pop TV - Transferencia"},{"id":9500000020000,"fecha":"2026-04-27","tipo":"Gasto","categoria":"SUSCRIPCIONES","monto":500.0,"detalle":"Pop TV - Suscripción adicional - Transferencia"},{"id":9600000002000,"fecha":"2025-09-01","tipo":"Gasto","categoria":"SUSCRIPCIONES","monto":3600.0,"detalle":"Pop TV - Suscripción anual - Transferencia"},{"id":9600000003000,"fecha":"2026-04-27","tipo":"Gasto","categoria":"SUSCRIPCIONES","monto":500.0,"detalle":"Pop TV adicional - Suscripción anual - Transferencia"},{"id":9600000004000,"fecha":"2026-04-27","tipo":"Gasto","categoria":"SERVICIOS","monto":809.63,"detalle":"Gas LP - Periodo 24 Mar al 23 Abr 2026"}];save();}}catch{gastos=[{"id":1700000000000,"fecha":"2011-10-02","tipo":"Gasto","categoria":"OTROS","monto":876.0,"detalle":""},{"id":1700000001000,"fecha":"2025-05-17","tipo":"Gasto","categoria":"GASOLINA / VIATICOS","monto":500.0,"detalle":"PASE"},{"id":1700000002000,"fecha":"2025-05-17","tipo":"Gasto","categoria":"GASOLINA / VIATICOS","monto":500.0,"detalle":"PASE"},{"id":1700000003000,"fecha":"2025-06-12","tipo":"Gasto","categoria":"MANTENIMIENTO COCHES","monto":2065.0,"detalle":"SOPORTE DE MOTOR JEEP "},{"id":1700000004000,"fecha":"2025-06-16","tipo":"Gasto","categoria":"SEGURO COCHES","monto":8674.53,"detalle":"RAQUEL"},{"id":1700000005000,"fecha":"2025-06-20","tipo":"Gasto","categoria":"SEGURO MÉDICO (Raquel)","monto":43877.0,"detalle":"SEGURO RAQUEL"},{"id":1700000006000,"fecha":"2025-08-29","tipo":"Gasto","categoria":"SEGURO MÉDICO (Raquel)","monto":42789.5,"detalle":"SEGURO RAQUEL"},{"id":1700000007000,"fecha":"2025-09-12","tipo":"Ingreso","categoria":"EMPLEO / INGRESO","monto":99919.97,"detalle":""},{"id":1700000008000,"fecha":"2025-09-15","tipo":"Gasto","categoria":"ESPOSA (Raquel)","monto":15000.0,"detalle":""},{"id":1700000009000,"fecha":"2025-09-15","tipo":"Gasto","categoria":"MANTENIMIENTO COCHES","monto":5412.0,"detalle":"LLANTA COCHE PEPE "},{"id":1700000010000,"fecha":"2025-09-16","tipo":"Gasto","categoria":"SEGURO MÉDICO (Raquel)","monto":3633.0,"detalle":"DEDUCIBLE RAQUEL "},{"id":1700000011000,"fecha":"2025-09-19","tipo":"Gasto","categoria":"POP TV","monto":3600.0,"detalle":""},{"id":1700000012000,"fecha":"2025-09-21","tipo":"Gasto","categoria":"SINAGOGA / RELIGIOSO","monto":4500.0,"detalle":""},{"id":1700000013000,"fecha":"2025-09-26","tipo":"Gasto","categoria":"SEGURO MÉDICO (Raquel)","monto":10216.0,"detalle":"SEGURO PEPE "},{"id":1700000014000,"fecha":"2025-09-27","tipo":"Gasto","categoria":"GAS","monto":789.6,"detalle":""},{"id":1700000015000,"fecha":"2025-10-02","tipo":"Gasto","categoria":"OTROS","monto":3900.0,"detalle":"ZARA RAQUEL "},{"id":1700000016000,"fecha":"2025-10-04","tipo":"Gasto","categoria":"DENTAL","monto":4777.0,"detalle":""},{"id":1700000017000,"fecha":"2025-10-04","tipo":"Gasto","categoria":"SEGURO CASA","monto":4002.0,"detalle":"REMODELACION "},{"id":1700000018000,"fecha":"2025-10-09","tipo":"Gasto","categoria":"SEGURO COCHES","monto":6930.0,"detalle":"PEPE"},{"id":1700000019000,"fecha":"2025-10-09","tipo":"Gasto","categoria":"MUCHACHA (Maribel)","monto":500.0,"detalle":"MARIBEL "},{"id":1700000020000,"fecha":"2025-10-13","tipo":"Gasto","categoria":"SEGURO COCHES","monto":6930.41,"detalle":"SEGURO JEEP RENEGADE"},{"id":1700000021000,"fecha":"2025-10-13","tipo":"Gasto","categoria":"SAT / CONTABILIDAD (SHEEP)","monto":1065.0,"detalle":"SAT"},{"id":1700000022000,"fecha":"2025-10-15","tipo":"Ingreso","categoria":"EMPLEO / INGRESO","monto":98358.43,"detalle":""},{"id":1700000023000,"fecha":"2025-10-15","tipo":"Ahorro","categoria":"MAASER (10%)","monto":9835.0,"detalle":"MENOS IMPUESTOS "},{"id":1700000024000,"fecha":"2025-10-15","tipo":"Gasto","categoria":"MANTENIMIENTO COCHES","monto":8490.0,"detalle":"COCHE RAQUEL "},{"id":1700000025000,"fecha":"2025-10-16","tipo":"Gasto","categoria":"ESPOSA (Raquel)","monto":20000.0,"detalle":""},{"id":1700000026000,"fecha":"2025-10-16","tipo":"Ahorro","categoria":"AHORRO GENERAL","monto":6918.0,"detalle":""},{"id":1700000027000,"fecha":"2025-10-16","tipo":"Gasto","categoria":"SEGURO MÉDICO (Raquel)","monto":3632.52,"detalle":"DEDUCIBLE RAQUEL "},{"id":1700000028000,"fecha":"2025-10-16","tipo":"Gasto","categoria":"MUCHACHA (Maribel)","monto":500.0,"detalle":""},{"id":1700000029000,"fecha":"2025-10-17","tipo":"Gasto","categoria":"SEGURO MÉDICO (Raquel)","monto":8324.0,"detalle":"LABORATORIOS MEDICOS POLANCO "},{"id":1700000030000,"fecha":"2025-10-17","tipo":"Gasto","categoria":"OTROS","monto":6000.0,"detalle":"SEMANA "},{"id":1700000031000,"fecha":"2025-10-17","tipo":"Gasto","categoria":"GASOLINA / VIATICOS","monto":1280.0,"detalle":""},{"id":1700000032000,"fecha":"2025-10-17","tipo":"Gasto","categoria":"MANTENIMIENTO COCHES","monto":950.0,"detalle":"MERCADO LIBRE"},{"id":1700000033000,"fecha":"2025-10-18","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":329.0,"detalle":""},{"id":1700000034000,"fecha":"2025-10-19","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":142.0,"detalle":""},{"id":1700000035000,"fecha":"2025-10-20","tipo":"Gasto","categoria":"RESTAURANTE","monto":1000.0,"detalle":"PAN Y CANELA "},{"id":1700000036000,"fecha":"2025-10-20","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":983.0,"detalle":""},{"id":1700000037000,"fecha":"2025-10-21","tipo":"Gasto","categoria":"DOCTORES","monto":3000.0,"detalle":"dr mercado "},{"id":1700000038000,"fecha":"2025-10-21","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":551.0,"detalle":""},{"id":1700000039000,"fecha":"2025-10-21","tipo":"Gasto","categoria":"MUCHACHA (Maribel)","monto":500.0,"detalle":"MARIBEL "},{"id":1700000040000,"fecha":"2025-10-21","tipo":"Gasto","categoria":"RAPPI / UBER EATS","monto":352.0,"detalle":"rappi"},{"id":1700000041000,"fecha":"2025-10-22","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":2205.0,"detalle":""},{"id":1700000042000,"fecha":"2025-10-22","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":1156.0,"detalle":""},{"id":1700000043000,"fecha":"2025-10-22","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":749.0,"detalle":""},{"id":1700000044000,"fecha":"2025-10-22","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":305.0,"detalle":"TIRA DE LED COCINA "},{"id":1700000045000,"fecha":"2025-10-22","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":283.0,"detalle":""},{"id":1700000046000,"fecha":"2025-10-22","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":189.0,"detalle":""},{"id":1700000047000,"fecha":"2025-10-23","tipo":"Gasto","categoria":"OTROS","monto":792.0,"detalle":"FARMACIA"},{"id":1700000048000,"fecha":"2025-10-23","tipo":"Gasto","categoria":"RAPPI / UBER EATS","monto":657.0,"detalle":""},{"id":1700000049000,"fecha":"2025-10-23","tipo":"Gasto","categoria":"MUCHACHA (Maribel)","monto":500.0,"detalle":""},{"id":1700000050000,"fecha":"2025-10-24","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":463.61,"detalle":""},{"id":1700000051000,"fecha":"2025-10-24","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":199.0,"detalle":""},{"id":1700000052000,"fecha":"2025-10-26","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":5450.0,"detalle":"SILLON CASA "},{"id":1700000053000,"fecha":"2025-10-26","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":5450.0,"detalle":"CASA NOGAL"},{"id":1700000054000,"fecha":"2025-10-26","tipo":"Gasto","categoria":"RESTAURANTE","monto":3116.5,"detalle":""},{"id":1700000055000,"fecha":"2025-10-26","tipo":"Gasto","categoria":"RESTAURANTE","monto":3116.5,"detalle":"proseco "},{"id":1700000056000,"fecha":"2025-10-26","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":2199.0,"detalle":"BANCOS CASA "},{"id":1700000057000,"fecha":"2025-10-26","tipo":"Gasto","categoria":"RESTAURANTE","monto":604.0,"detalle":"AJGLA"},{"id":1700000058000,"fecha":"2025-10-26","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":400.0,"detalle":""},{"id":1700000059000,"fecha":"2025-10-26","tipo":"Gasto","categoria":"OTROS","monto":300.0,"detalle":"ESTACIONAMINTO "},{"id":1700000060000,"fecha":"2025-10-26","tipo":"Gasto","categoria":"OTROS","monto":120.0,"detalle":"ESTACIONAINETO "},{"id":1700000061000,"fecha":"2025-10-26","tipo":"Gasto","categoria":"OTROS","monto":75.0,"detalle":""},{"id":1700000062000,"fecha":"2025-10-26","tipo":"Gasto","categoria":"OTROS","monto":30.0,"detalle":"ESTACIONAINETO "},{"id":1700000063000,"fecha":"2025-10-27","tipo":"Gasto","categoria":"OTROS","monto":4800.0,"detalle":"SEMANA "},{"id":1700000064000,"fecha":"2025-10-27","tipo":"Gasto","categoria":"MUCHACHA (Maribel)","monto":500.0,"detalle":"MARIBEL "},{"id":1700000065000,"fecha":"2025-10-27","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":220.0,"detalle":""},{"id":1700000066000,"fecha":"2025-10-28","tipo":"Gasto","categoria":"SINAGOGA / RELIGIOSO","monto":1900.0,"detalle":""},{"id":1700000067000,"fecha":"2025-10-28","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":1000.0,"detalle":""},{"id":1700000068000,"fecha":"2025-10-28","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":199.0,"detalle":""},{"id":1700000069000,"fecha":"2025-10-29","tipo":"Gasto","categoria":"MTTO CASA (mantenimiento)","monto":12694.0,"detalle":""},{"id":1700000070000,"fecha":"2025-10-29","tipo":"Gasto","categoria":"DOCTORES","monto":3500.0,"detalle":"HARFUSH "},{"id":1700000071000,"fecha":"2025-10-29","tipo":"Gasto","categoria":"DENTAL","monto":3000.0,"detalle":""},{"id":1700000072000,"fecha":"2025-10-29","tipo":"Gasto","categoria":"CUOTA EXTRAORDINARIA","monto":2938.0,"detalle":""},{"id":1700000073000,"fecha":"2025-10-29","tipo":"Gasto","categoria":"RESTAURANTE","monto":1582.0,"detalle":""},{"id":1700000074000,"fecha":"2025-10-29","tipo":"Gasto","categoria":"DOCTORES","monto":1500.0,"detalle":"ANGIE"},{"id":1700000075000,"fecha":"2025-10-29","tipo":"Gasto","categoria":"RAPPI / UBER EATS","monto":313.57,"detalle":""},{"id":1700000076000,"fecha":"2025-10-29","tipo":"Gasto","categoria":"OTROS","monto":240.0,"detalle":"ESTACIONAINETO "},{"id":1700000077000,"fecha":"2025-10-30","tipo":"Gasto","categoria":"OTROS","monto":4800.0,"detalle":"SEMANA "},{"id":1700000078000,"fecha":"2025-10-30","tipo":"Gasto","categoria":"TELEFONO","monto":649.0,"detalle":""},{"id":1700000079000,"fecha":"2025-11-01","tipo":"Gasto","categoria":"MTTO CASA (mantenimiento)","monto":12694.0,"detalle":""},{"id":1700000080000,"fecha":"2025-11-01","tipo":"Gasto","categoria":"CUOTA EXTRAORDINARIA","monto":2938.0,"detalle":""},{"id":1700000081000,"fecha":"2025-11-02","tipo":"Gasto","categoria":"OTROS","monto":3900.0,"detalle":"ZARA "},{"id":1700000082000,"fecha":"2025-11-02","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":832.0,"detalle":""},{"id":1700000083000,"fecha":"2025-11-02","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":660.0,"detalle":""},{"id":1700000084000,"fecha":"2025-11-02","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":637.0,"detalle":""},{"id":1700000085000,"fecha":"2025-11-02","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":338.0,"detalle":""},{"id":1700000086000,"fecha":"2025-11-02","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":299.0,"detalle":""},{"id":1700000087000,"fecha":"2025-11-02","tipo":"Gasto","categoria":"OTROS","monto":120.0,"detalle":"HELADO "},{"id":1700000088000,"fecha":"2025-11-03","tipo":"Gasto","categoria":"DENTAL","monto":4500.0,"detalle":""},{"id":1700000089000,"fecha":"2025-11-03","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":4200.0,"detalle":""},{"id":1700000090000,"fecha":"2025-11-03","tipo":"Gasto","categoria":"SEGURO CASA","monto":4002.0,"detalle":""},{"id":1700000091000,"fecha":"2025-11-03","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":1468.73,"detalle":""},{"id":1700000092000,"fecha":"2025-11-03","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":1468.0,"detalle":""},{"id":1700000093000,"fecha":"2025-11-03","tipo":"Gasto","categoria":"MUCHACHA (Maribel)","monto":500.0,"detalle":""},{"id":1700000094000,"fecha":"2025-11-04","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":22527.64,"detalle":"EL SURTIDOR "},{"id":1700000095000,"fecha":"2025-11-04","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":854.05,"detalle":""},{"id":1700000096000,"fecha":"2025-11-04","tipo":"Gasto","categoria":"RESTAURANTE","monto":361.1,"detalle":"YAKUMI"},{"id":1700000097000,"fecha":"2025-11-05","tipo":"Gasto","categoria":"DENTAL","monto":3102.0,"detalle":""},{"id":1700000098000,"fecha":"2025-11-06","tipo":"Gasto","categoria":"SEGURO MÉDICO (Raquel)","monto":2200.0,"detalle":"FISIO "},{"id":1700000099000,"fecha":"2025-11-06","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":1098.65,"detalle":""},{"id":1700000100000,"fecha":"2025-11-06","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":1016.16,"detalle":""},{"id":1700000101000,"fecha":"2025-11-06","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":552.6,"detalle":""},{"id":1700000102000,"fecha":"2025-11-06","tipo":"Gasto","categoria":"MUCHACHA (Maribel)","monto":500.0,"detalle":""},{"id":1700000103000,"fecha":"2025-11-10","tipo":"Gasto","categoria":"SAT / CONTABILIDAD (SHEEP)","monto":580.0,"detalle":""},{"id":1700000104000,"fecha":"2025-11-12","tipo":"Gasto","categoria":"OTROS","monto":1200.0,"detalle":""},{"id":1700000105000,"fecha":"2025-11-13","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":1021.0,"detalle":""},{"id":1700000106000,"fecha":"2025-11-13","tipo":"Gasto","categoria":"MUCHACHA (Maribel)","monto":500.0,"detalle":""},{"id":1700000107000,"fecha":"2025-11-13","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":1016.0,"detalle":"iluminacion y contacto "},{"id":1700000108000,"fecha":"2025-11-14","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":1000.0,"detalle":""},{"id":1700000109000,"fecha":"2025-11-15","tipo":"Gasto","categoria":"OTROS","monto":922.0,"detalle":"FARMACIA "},{"id":1700000110000,"fecha":"2025-11-16","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":107100.0,"detalle":"ESTUDIO Y SALA "},{"id":1700000112000,"fecha":"2025-11-16","tipo":"Gasto","categoria":"OTROS","monto":669.0,"detalle":"garmin"},{"id":1700000113000,"fecha":"2025-11-17","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":79100.0,"detalle":"MESA COMEDOR "},{"id":1700000114000,"fecha":"2025-11-17","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":659.0,"detalle":""},{"id":1700000115000,"fecha":"2025-11-18","tipo":"Gasto","categoria":"GASOLINA / VIATICOS","monto":600.0,"detalle":"tag"},{"id":1700000116000,"fecha":"2025-11-19","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":21599.0,"detalle":"SAMSUNG TELE 65"},{"id":1700000117000,"fecha":"2025-11-19","tipo":"Gasto","categoria":"GASOLINA / VIATICOS","monto":600.0,"detalle":"gasolin a"},{"id":1700000118000,"fecha":"2025-11-20","tipo":"Gasto","categoria":"OTROS","monto":355.0,"detalle":"dazn"},{"id":1700000119000,"fecha":"2025-11-21","tipo":"Gasto","categoria":"OTROS","monto":289.0,"detalle":"LINDT"},{"id":1700000120000,"fecha":"2025-11-22","tipo":"Gasto","categoria":"GASOLINA / VIATICOS","monto":150.0,"detalle":"tag"},{"id":1700000121000,"fecha":"2025-11-23","tipo":"Gasto","categoria":"OTROS","monto":1716.0,"detalle":"RESTAURANTE "},{"id":1700000122000,"fecha":"2025-11-23","tipo":"Gasto","categoria":"GASOLINA / VIATICOS","monto":1500.0,"detalle":"LICENCIA "},{"id":1700000123000,"fecha":"2025-11-23","tipo":"Gasto","categoria":"OTROS","monto":654.0,"detalle":"CINE "},{"id":1700000124000,"fecha":"2025-11-23","tipo":"Gasto","categoria":"OTROS","monto":639.4,"detalle":"YAKUMI "},{"id":1700000125000,"fecha":"2025-11-23","tipo":"Gasto","categoria":"OTROS","monto":156.0,"detalle":"ESTCIONAMINTO "},{"id":1700000126000,"fecha":"2025-11-25","tipo":"Gasto","categoria":"MTTO CASA (mantenimiento)","monto":11515.0,"detalle":"CANCELERO "},{"id":1700000127000,"fecha":"2025-11-25","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":5450.0,"detalle":"CASA NOGAL "},{"id":1700000128000,"fecha":"2025-11-26","tipo":"Gasto","categoria":"GAS","monto":1063.32,"detalle":"royal gas "},{"id":1700000129000,"fecha":"2025-11-26","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":1047.0,"detalle":"TIEMPO ARTE "},{"id":1700000130000,"fecha":"2025-11-26","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":4150.0,"detalle":"CANCELERO "},{"id":1700000131000,"fecha":"2025-11-27","tipo":"Gasto","categoria":"OTROS","monto":4400.0,"detalle":"lulu"},{"id":1700000132000,"fecha":"2025-11-27","tipo":"Gasto","categoria":"OTROS","monto":899.0,"detalle":"vanity"},{"id":1700000133000,"fecha":"2025-11-27","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":3555.0,"detalle":"REGADERA"},{"id":1700000134000,"fecha":"2025-11-28","tipo":"Gasto","categoria":"AGUA","monto":2468.0,"detalle":""},{"id":1700000135000,"fecha":"2025-11-29","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":2000.0,"detalle":""},{"id":1700000136000,"fecha":"2025-11-30","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":660.24,"detalle":""},{"id":1700000137000,"fecha":"2025-11-30","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":2000.0,"detalle":""},{"id":1700000138000,"fecha":"2025-12-10","tipo":"Gasto","categoria":"MTTO CASA (mantenimiento)","monto":12694.0,"detalle":""},{"id":1700000139000,"fecha":"2025-12-10","tipo":"Gasto","categoria":"CUOTA EXTRAORDINARIA","monto":2938.0,"detalle":""},{"id":1700000140000,"fecha":"2025-12-15","tipo":"Ingreso","categoria":"EMPLEO / INGRESO","monto":157527.08,"detalle":""},{"id":1700000141000,"fecha":"2025-12-03","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":8998.8,"detalle":"WEST ELM"},{"id":1700000142000,"fecha":"2025-12-03","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":4889.3,"detalle":"WEST ELM"},{"id":1700000143000,"fecha":"2025-12-03","tipo":"Gasto","categoria":"OTROS","monto":4877.6,"detalle":"ESPOSA BANANA "},{"id":1700000144000,"fecha":"2025-11-30","tipo":"Gasto","categoria":"OTROS","monto":3678.0,"detalle":"SOLEDAD VALLE"},{"id":1700000145000,"fecha":"2025-11-30","tipo":"Gasto","categoria":"GASOLINA / VIATICOS","monto":736.91,"detalle":"GASOLINA "},{"id":1700000146000,"fecha":"2025-11-30","tipo":"Gasto","categoria":"OTROS","monto":668.0,"detalle":"CAFÉ VALLE"},{"id":1700000147000,"fecha":"2025-12-03","tipo":"Gasto","categoria":"OTROS","monto":8500.0,"detalle":"vanity "},{"id":1700000148000,"fecha":"2025-12-08","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":281530.0,"detalle":"ENGANCHE "},{"id":1700000149000,"fecha":"2025-12-09","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":535.0,"detalle":""},{"id":1700000150000,"fecha":"2025-12-06","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":1288.0,"detalle":""},{"id":1700000151000,"fecha":"2025-12-08","tipo":"Gasto","categoria":"MUCHACHA (Maribel)","monto":500.0,"detalle":""},{"id":1700000152000,"fecha":"2025-12-11","tipo":"Gasto","categoria":"MUCHACHA (Maribel)","monto":500.0,"detalle":""},{"id":1700000153000,"fecha":"2025-12-11","tipo":"Gasto","categoria":"OTROS","monto":2500.0,"detalle":"carga de mesa pin pon "},{"id":1700000154000,"fecha":"2025-12-10","tipo":"Gasto","categoria":"OTROS","monto":2875.0,"detalle":""},{"id":1700000155000,"fecha":"2025-12-10","tipo":"Gasto","categoria":"OTROS","monto":53.0,"detalle":"ESTACIONAINETO "},{"id":1700000156000,"fecha":"2025-12-15","tipo":"Gasto","categoria":"MUCHACHA (Maribel)","monto":500.0,"detalle":""},{"id":1700000157000,"fecha":"2025-12-12","tipo":"Gasto","categoria":"OTROS","monto":1200.0,"detalle":""},{"id":1700000158000,"fecha":"2025-12-11","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":3000.0,"detalle":"LEVANTAMINTO DE MESA "},{"id":1700000159000,"fecha":"2025-12-11","tipo":"Gasto","categoria":"MUCHACHA (Maribel)","monto":500.0,"detalle":""},{"id":1700000160000,"fecha":"2025-12-15","tipo":"Gasto","categoria":"ESPOSA (Raquel)","monto":17000.0,"detalle":""},{"id":1700000161000,"fecha":"2025-12-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":1700000162000,"fecha":"2025-12-15","tipo":"Gasto","categoria":"SAT / CONTABILIDAD (SHEEP)","monto":1044.0,"detalle":""},{"id":1700000163000,"fecha":"2026-01-14","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":1700000164000,"fecha":"2026-01-01","tipo":"Gasto","categoria":"PREDIAL","monto":8143.0,"detalle":""},{"id":1700000165000,"fecha":"2026-01-02","tipo":"Gasto","categoria":"MANTENIMIENTO COCHES","monto":6342.0,"detalle":""},{"id":1700000166000,"fecha":"2026-01-01","tipo":"Gasto","categoria":"AGUA","monto":1198.0,"detalle":""},{"id":1700000167000,"fecha":"2026-01-05","tipo":"Gasto","categoria":"TELEMEX / Internet","monto":349.0,"detalle":""},{"id":1700000168000,"fecha":"2026-01-15","tipo":"Ingreso","categoria":"EMPLEO / INGRESO","monto":98879.13,"detalle":""},{"id":1700000171000,"fecha":"2026-01-26","tipo":"Gasto","categoria":"MUCHACHA (Maribel)","monto":500.0,"detalle":""},{"id":1700000172000,"fecha":"2026-01-24","tipo":"Gasto","categoria":"OTROS","monto":1500.0,"detalle":""},{"id":1700000173000,"fecha":"2026-01-15","tipo":"Gasto","categoria":"OTROS","monto":1408.0,"detalle":""},{"id":1700000174000,"fecha":"2026-01-25","tipo":"Gasto","categoria":"DENTAL","monto":6850.0,"detalle":""},{"id":1700000175000,"fecha":"2025-12-29","tipo":"Gasto","categoria":"LUZ","monto":179.0,"detalle":""},{"id":1700000176000,"fecha":"2026-01-22","tipo":"Gasto","categoria":"AMAZON/MERCADO LIBRE/RAPPI","monto":999.0,"detalle":""},{"id":1700000177000,"fecha":"2026-01-23","tipo":"Gasto","categoria":"AMAZON/MERCADO LIBRE/RAPPI","monto":413.45,"detalle":""},{"id":1700000178000,"fecha":"2026-01-24","tipo":"Gasto","categoria":"AMAZON/MERCADO LIBRE/RAPPI","monto":1411.0,"detalle":""},{"id":1700000179000,"fecha":"2026-01-25","tipo":"Gasto","categoria":"AMAZON/MERCADO LIBRE/RAPPI","monto":563.0,"detalle":""},{"id":1700000180000,"fecha":"2026-01-26","tipo":"Gasto","categoria":"AT&T TELÉFONO","monto":579.0,"detalle":""},{"id":1700000181000,"fecha":"2026-01-16","tipo":"Gasto","categoria":"ESPOSA (Raquel)","monto":15000.0,"detalle":""},{"id":1700000182000,"fecha":"2026-01-27","tipo":"Gasto","categoria":"DOCTORES","monto":2900.0,"detalle":""},{"id":1700000183000,"fecha":"2026-01-22","tipo":"Gasto","categoria":"MUCHACHA (Maribel)","monto":500.0,"detalle":""},{"id":1700000184000,"fecha":"2026-02-01","tipo":"Gasto","categoria":"TELEMEX / Internet","monto":349.0,"detalle":""},{"id":1700000185000,"fecha":"2026-03-02","tipo":"Gasto","categoria":"TELEMEX / Internet","monto":349.0,"detalle":""},{"id":1700000196000,"fecha":"2026-01-21","tipo":"Gasto","categoria":"SAT / CONTABILIDAD (SHEEP)","monto":1299.0,"detalle":""},{"id":1700000197000,"fecha":"2026-01-20","tipo":"Gasto","categoria":"SAT / CONTABILIDAD (SHEEP)","monto":580.0,"detalle":""},{"id":1700000198000,"fecha":"2026-02-02","tipo":"Gasto","categoria":"OTROS","monto":2730.0,"detalle":""},{"id":1700000199000,"fecha":"2026-02-02","tipo":"Gasto","categoria":"OTROS","monto":80.0,"detalle":""},{"id":1700000200000,"fecha":"2026-02-02","tipo":"Gasto","categoria":"OTROS","monto":787.0,"detalle":""},{"id":1700000201000,"fecha":"2026-02-02","tipo":"Gasto","categoria":"OTROS","monto":127.0,"detalle":""},{"id":1700000202000,"fecha":"2026-02-02","tipo":"Gasto","categoria":"OTROS","monto":1599.0,"detalle":""},{"id":1700000203000,"fecha":"2026-02-02","tipo":"Gasto","categoria":"OTROS","monto":3850.0,"detalle":""},{"id":1700000204000,"fecha":"2026-02-02","tipo":"Gasto","categoria":"OTROS","monto":1481.0,"detalle":""},{"id":1700000205000,"fecha":"2026-02-02","tipo":"Gasto","categoria":"OTROS","monto":3710.0,"detalle":""},{"id":1700000206000,"fecha":"2026-02-01","tipo":"Gasto","categoria":"OTROS","monto":1588.0,"detalle":""},{"id":1700000207000,"fecha":"2026-01-30","tipo":"Gasto","categoria":"OTROS","monto":238.0,"detalle":""},{"id":1700000208000,"fecha":"2026-02-16","tipo":"Gasto","categoria":"LUZ","monto":197.0,"detalle":""},{"id":1700000209000,"fecha":"2026-02-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.04,"detalle":""},{"id":1700000210000,"fecha":"2026-03-01","tipo":"Gasto","categoria":"OTROS","monto":406.0,"detalle":"depor oakberry"},{"id":1700000211000,"fecha":"2026-03-01","tipo":"Gasto","categoria":"OTROS","monto":400.0,"detalle":"aviv "},{"id":1700000212000,"fecha":"2026-02-28","tipo":"Gasto","categoria":"OTROS","monto":1625.0,"detalle":""},{"id":1700000213000,"fecha":"2026-03-06","tipo":"Gasto","categoria":"OTROS","monto":5200.0,"detalle":""},{"id":1700000214000,"fecha":"2026-03-08","tipo":"Gasto","categoria":"OTROS","monto":149.0,"detalle":""},{"id":1700000215000,"fecha":"2026-03-06","tipo":"Gasto","categoria":"GAS","monto":1089.0,"detalle":""},{"id":1700000216000,"fecha":"2026-02-14","tipo":"Ingreso","categoria":"EMPLEO / INGRESO","monto":99711.8,"detalle":""},{"id":1700000217000,"fecha":"2026-03-15","tipo":"Ingreso","categoria":"EMPLEO / INGRESO","monto":98046.67,"detalle":""},{"id":1700000218000,"fecha":"2026-03-16","tipo":"Gasto","categoria":"ESPOSA (Raquel)","monto":25000.0,"detalle":""},{"id":1700000219000,"fecha":"2026-03-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":1700000220000,"fecha":"2026-02-28","tipo":"Gasto","categoria":"MTTO CASA (mantenimiento)","monto":12694.0,"detalle":""},{"id":1700000221000,"fecha":"2026-03-06","tipo":"Gasto","categoria":"PALACIO DE HIERRO","monto":65815.0,"detalle":""},{"id":1700000222000,"fecha":"2026-04-06","tipo":"Gasto","categoria":"PALACIO DE HIERRO","monto":6645.0,"detalle":""},{"id":1800000000000,"fecha":"2026-03-15","tipo":"Gasto","categoria":"RAPPI / UBER EATS","monto":984.0,"detalle":"Rappi - Amex"},{"id":1800000001000,"fecha":"2026-03-17","tipo":"Gasto","categoria":"GASTOS CASA Samsung","monto":1199.96,"detalle":"Samsung cargo 05/18 - Amex"},{"id":1800000002000,"fecha":"2026-03-17","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":199.0,"detalle":"Amazon - Amex"},{"id":1800000003000,"fecha":"2026-03-17","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":105.0,"detalle":"Amazon - Amex"},{"id":1800000004000,"fecha":"2026-03-17","tipo":"Gasto","categoria":"SEGURO CASA","monto":10061.57,"detalle":"Zurich seguros daño - Amex"},{"id":1800000005000,"fecha":"2026-03-17","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":1210.5,"detalle":"Amazon - Amex"},{"id":1800000006000,"fecha":"2026-03-17","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":1105.66,"detalle":"Amazon - Amex"},{"id":1800000007000,"fecha":"2026-03-17","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":520.83,"detalle":"Amazon MSI cargo 9/12 - Amex"},{"id":1800000008000,"fecha":"2026-03-18","tipo":"Gasto","categoria":"ESPOSA (Raquel)","monto":1439.14,"detalle":"Tienda online Raquel - Amex"},{"id":1800000009000,"fecha":"2026-03-19","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":419.0,"detalle":"Amazon - Amex"},{"id":1800000010000,"fecha":"2026-03-19","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":169.0,"detalle":"Amazon - Amex"},{"id":1800000011000,"fecha":"2026-03-19","tipo":"Gasto","categoria":"ROPA / ZARA","monto":1599.0,"detalle":"Dportenis - Amex"},{"id":1800000012000,"fecha":"2026-03-20","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":3468.0,"detalle":"Amazon - Amex"},{"id":1800000013000,"fecha":"2026-03-22","tipo":"Gasto","categoria":"AT&T TELÉFONO","monto":579.0,"detalle":"AT&T - Amex"},{"id":1800000014000,"fecha":"2026-03-22","tipo":"Gasto","categoria":"ROPA / ZARA","monto":1290.0,"detalle":"Hollister - Amex"},{"id":1800000015000,"fecha":"2026-03-22","tipo":"Gasto","categoria":"ROPA / ZARA","monto":5294.0,"detalle":"Zara - Amex"},{"id":1800000016000,"fecha":"2026-03-22","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":562.74,"detalle":"Amazon - Amex"},{"id":1800000017000,"fecha":"2026-03-22","tipo":"Gasto","categoria":"SUPER / DESPENSA","monto":3139.77,"detalle":"KosherClick - Amex"},{"id":1800000018000,"fecha":"2026-03-23","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":196.12,"detalle":"Amazon - Amex"},{"id":1800000019000,"fecha":"2026-03-23","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":756.1,"detalle":"Amazon - Amex"},{"id":1800000020000,"fecha":"2026-03-23","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":237.0,"detalle":"Amazon - Amex"},{"id":1800000021000,"fecha":"2026-03-23","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":1027.41,"detalle":"Amazon - Amex"},{"id":1800000022000,"fecha":"2026-03-24","tipo":"Gasto","categoria":"GASOLINA / VIATICOS","monto":700.0,"detalle":"Pase TAG - Amex"},{"id":1800000023000,"fecha":"2026-03-25","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":379.0,"detalle":"Amazon - Amex"},{"id":1800000024000,"fecha":"2026-03-25","tipo":"Gasto","categoria":"APPLE","monto":49.0,"detalle":"Apple.com - Amex"},{"id":1800000025000,"fecha":"2026-03-25","tipo":"Gasto","categoria":"RESTAURANTE","monto":527.85,"detalle":"Yakkumi Raquel - Amex"},{"id":1800000026000,"fecha":"2026-03-27","tipo":"Gasto","categoria":"OTROS","monto":40.0,"detalle":"Parco - estacionamiento"},{"id":1800000027000,"fecha":"2026-03-27","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":540.0,"detalle":"Amazon - Amex"},{"id":1800000028000,"fecha":"2026-03-27","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":685.0,"detalle":"Amazon - Amex"},{"id":1800000029000,"fecha":"2026-03-27","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":229.0,"detalle":"Amazon - Amex"},{"id":1800000030000,"fecha":"2026-03-27","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":516.09,"detalle":"Amazon - Amex"},{"id":1800000031000,"fecha":"2026-03-28","tipo":"Gasto","categoria":"RAPPI / UBER EATS","monto":576.23,"detalle":"Rappi - Amex"},{"id":1800000032000,"fecha":"2026-03-29","tipo":"Gasto","categoria":"OTROS","monto":140.0,"detalle":"Parco - estacionamiento"},{"id":1800000033000,"fecha":"2026-03-29","tipo":"Gasto","categoria":"OTROS","monto":71.0,"detalle":"Parco - estacionamiento"},{"id":1800000034000,"fecha":"2026-03-29","tipo":"Gasto","categoria":"ROPA / ZARA","monto":2995.0,"detalle":"Massimo Dutti - Amex"},{"id":1800000035000,"fecha":"2026-03-29","tipo":"Gasto","categoria":"OTROS COMERCIOS","monto":8740.0,"detalle":"Exalta Hero - Amex"},{"id":1800000036000,"fecha":"2026-03-29","tipo":"Gasto","categoria":"UBER / TAXI","monto":70.0,"detalle":"Uber - Amex"},{"id":1800000037000,"fecha":"2026-03-29","tipo":"Gasto","categoria":"RAPPI / UBER EATS","monto":69.0,"detalle":"Rappi Prime - Amex"},{"id":1800000038000,"fecha":"2026-03-29","tipo":"Gasto","categoria":"SUPER / DESPENSA","monto":2639.0,"detalle":"KosherClick - Amex"},{"id":1800000039000,"fecha":"2026-03-30","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":331.0,"detalle":"Amazon - Amex"},{"id":1800000040000,"fecha":"2026-03-31","tipo":"Gasto","categoria":"RAPPI / UBER EATS","monto":961.4,"detalle":"Rappi - Amex"},{"id":1800000041000,"fecha":"2026-04-01","tipo":"Gasto","categoria":"RENTA DE COCHE","monto":5203.05,"detalle":"Avis - renta coche Vallarta"},{"id":1800000042000,"fecha":"2026-04-04","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":1524.37,"detalle":"Amazon - Amex"},{"id":1800000043000,"fecha":"2026-04-04","tipo":"Gasto","categoria":"OTROS COMERCIOS","monto":109.57,"detalle":"Oura Ring - Amex"},{"id":1800000044000,"fecha":"2026-04-05","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":649.0,"detalle":"Amazon - Amex"},{"id":1800000045000,"fecha":"2026-04-05","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":6499.0,"detalle":"Amazon - Amex"},{"id":1800000046000,"fecha":"2026-04-06","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":632.38,"detalle":"Amazon - Amex"},{"id":1800000047000,"fecha":"2026-04-07","tipo":"Gasto","categoria":"RAPPI / UBER EATS","monto":371.8,"detalle":"Rappi - Amex"},{"id":1800000048000,"fecha":"2026-04-10","tipo":"Gasto","categoria":"SAT / CONTABILIDAD (SHEEP)","monto":604.0,"detalle":"Sheep - Amex"},{"id":1800000049000,"fecha":"2026-04-14","tipo":"Gasto","categoria":"TELEMEX / Internet","monto":349.0,"detalle":"Telmex - Amex"},{"id":1800000050000,"fecha":"2026-04-14","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":100.01,"detalle":"Amazon - Amex"},{"id":1800000051000,"fecha":"2026-04-15","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":999.01,"detalle":"Amazon - Amex"},{"id":1800000052000,"fecha":"2026-04-15","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":365.16,"detalle":"Amazon - Amex"},{"id":1800000053000,"fecha":"2026-04-15","tipo":"Gasto","categoria":"OTROS","monto":43.0,"detalle":"Parco - estacionamiento"},{"id":1800000054000,"fecha":"2026-04-15","tipo":"Gasto","categoria":"OTROS","monto":46.0,"detalle":"Parco - estacionamiento"},{"id":1800000055000,"fecha":"2026-04-15","tipo":"Gasto","categoria":"SUPER / DESPENSA","monto":563.75,"detalle":"Kosherits - Amex"},{"id":1900000000000,"fecha":"2026-04-18","tipo":"Gasto","categoria":"OTROS COMERCIOS","monto":9131.0,"detalle":"Shohop - ropa"},{"id":1900000001000,"fecha":"2026-04-15","tipo":"Gasto","categoria":"AT&T TELÉFONO","monto":579.0,"detalle":"AT&T Lite 3 - factura Apr"},{"id":1900000002000,"fecha":"2026-04-14","tipo":"Gasto","categoria":"LUZ","monto":207.0,"detalle":"CFE bimestral Feb-Abr"},{"id":1800000056000,"fecha":"2026-04-16","tipo":"Gasto","categoria":"AMAZON / MERCADO LIBRE","monto":847.38,"detalle":"Amazon - Amex"},{"id":1900000003000,"fecha":"2026-04-15","tipo":"Ingreso","categoria":"EMPLEO / INGRESO","monto":103042.47,"detalle":""},{"id":1900000004000,"fecha":"2026-04-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":1900000005000,"fecha":"2026-04-16","tipo":"Gasto","categoria":"ESPOSA (Raquel)","monto":15000.0,"detalle":""},{"id":2000000000000,"fecha":"2026-05-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":2000000001000,"fecha":"2026-06-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":2000000002000,"fecha":"2026-07-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":2000000003000,"fecha":"2026-08-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":2000000004000,"fecha":"2026-09-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":2000000005000,"fecha":"2026-10-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":2000000006000,"fecha":"2026-11-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":2000000007000,"fecha":"2026-12-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":2000000008000,"fecha":"2027-01-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":2000000009000,"fecha":"2027-02-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":2000000010000,"fecha":"2027-03-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":2000000011000,"fecha":"2027-04-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":2000000012000,"fecha":"2027-05-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":2000000013000,"fecha":"2027-06-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":2000000014000,"fecha":"2027-07-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":2000000015000,"fecha":"2027-08-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":2000000016000,"fecha":"2027-09-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":2000000017000,"fecha":"2027-10-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":2000000018000,"fecha":"2027-11-16","tipo":"Gasto","categoria":"COCHE N (CRÉDITO)","monto":13900.0,"detalle":""},{"id":1900000010000,"fecha":"2026-03-13","tipo":"Gasto","categoria":"GYM / DEPORTE","monto":958.0,"detalle":"F 119 STIM MEXICO - Gold"},{"id":1900000011000,"fecha":"2026-03-14","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":816.5,"detalle":"ZTL*DANIEL WELLINGTON CUAJIMALPA DE M - Gold"},{"id":1900000012000,"fecha":"2026-03-16","tipo":"Gasto","categoria":"RESTAURANTE","monto":1921.7,"detalle":"HUNAN ARTZ MEXICO - Gold"},{"id":1900000013000,"fecha":"2026-03-16","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":1596.0,"detalle":"UGG ARTZ SM MEXICO - Gold"},{"id":1900000014000,"fecha":"2026-03-16","tipo":"Gasto","categoria":"RESTAURANTE","monto":250.0,"detalle":"MITPOLO*REST ARTZ MYKA CIUDAD DE MEX - Gold"},{"id":1900000015000,"fecha":"2026-03-16","tipo":"Gasto","categoria":"RESTAURANTE","monto":3748.0,"detalle":"BROWNIE ARTZ MEXICO - Gold"},{"id":1900000017000,"fecha":"2026-03-18","tipo":"Gasto","categoria":"COMIDA A DOMICILIO / SÚPER","monto":1120.1,"detalle":"BILLPOCKET*YAKKUMI DEB1 CUAJIMALPA DE - Gold"},{"id":1900000019000,"fecha":"2026-03-21","tipo":"Gasto","categoria":"COMIDA A DOMICILIO / SÚPER","monto":981.2,"detalle":"BILLPOCKET*YAKKUMI DEB1 CUAJIMALPA DE - Gold"},{"id":1900000020000,"fecha":"2026-03-22","tipo":"Gasto","categoria":"RESTAURANTE","monto":153.0,"detalle":"NETPAY*AMORINO DELTA AV Ciudad De Mexic - Gold"},{"id":1900000021000,"fecha":"2026-03-22","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":4658.0,"detalle":"*SCAPPINO PARQUE DELTA BENITO JUAREZ - Gold"},{"id":1900000022000,"fecha":"2026-03-22","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":2003.0,"detalle":"MANGO SANTA FE SM MEXICO - Gold"},{"id":1900000023000,"fecha":"2026-03-22","tipo":"Gasto","categoria":"OTROS","monto":1430.17,"detalle":"OPERADORA DE SERVICIOS MEXICO - Gold"},{"id":1900000024000,"fecha":"2026-03-24","tipo":"Gasto","categoria":"BELLEZA / BARBERÍA","monto":390.0,"detalle":"HOM ALTA PELUQUERIA HUIXQUILUCAN - Gold"},{"id":1900000025000,"fecha":"2026-03-24","tipo":"Gasto","categoria":"RESTAURANTE","monto":33.0,"detalle":"KRISPY KREME KK LERMA LERMA EM - Gold"},{"id":1900000026000,"fecha":"2026-03-25","tipo":"Gasto","categoria":"SALUD","monto":134.4,"detalle":"HOSPITAL ANGELES LOMAS HUIXQUILUCAN DE - Gold"},{"id":1900000027000,"fecha":"2026-03-25","tipo":"Gasto","categoria":"SALUD","monto":1600.0,"detalle":"DRA REGAN ANGELA HUIXQUILUCAN - Gold"},{"id":1900000028000,"fecha":"2026-03-28","tipo":"Gasto","categoria":"RESTAURANTE","monto":1368.5,"detalle":"SCOOZI RISTORANTE CUAJIMALPA - Gold"},{"id":1900000029000,"fecha":"2026-03-29","tipo":"Gasto","categoria":"APPS (Uber/Rappi/etc)","monto":52.75,"detalle":"DRIVEAPP ALVARO OBREGON - Gold"},{"id":1900000030000,"fecha":"2026-03-29","tipo":"Gasto","categoria":"OTROS","monto":255.0,"detalle":"INTERLOMAS CAR WASH 000 HUIXQUILUCAN - Gold"},{"id":1900000031000,"fecha":"2026-03-30","tipo":"Gasto","categoria":"OTROS","monto":602.0,"detalle":"FARM PVR CONOS OLAS AL PUERTO VALLAR - Gold"},{"id":1900000033000,"fecha":"2026-03-30","tipo":"Gasto","categoria":"RESTAURANTE","monto":48.0,"detalle":"KRISPY KREME KRISPY KRE ZUMPANGO - Gold"},{"id":1900000034000,"fecha":"2026-03-31","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":1359.0,"detalle":"RIP CURL BAHIA DE BAND - Gold"},{"id":1900000035000,"fecha":"2026-03-31","tipo":"Gasto","categoria":"SALUD","monto":126.0,"detalle":"FARMACIA PV BAHIA DE BAND - Gold"},{"id":1900000036000,"fecha":"2026-03-31","tipo":"Gasto","categoria":"OTROS COMERCIOS","monto":2000.0,"detalle":"MERCADOPAGO*ANNCLA Bah?a De Band - Gold"},{"id":1900000037000,"fecha":"2026-04-01","tipo":"Gasto","categoria":"GASOLINA / VIÁTICOS","monto":793.56,"detalle":"GASOLINER ORO VALLARTA PUERTO VALLAR - Gold"},{"id":1900000038000,"fecha":"2026-04-05","tipo":"Gasto","categoria":"OTROS COMERCIOS","monto":520.0,"detalle":"MERCADO LIBRE MEXICO - Gold"},{"id":1900000039000,"fecha":"2026-04-11","tipo":"Gasto","categoria":"OTROS COMERCIOS","monto":499.67,"detalle":"MERCADO LIBRE MEXICO - Gold"},{"id":1900000040000,"fecha":"2026-04-12","tipo":"Gasto","categoria":"RESTAURANTE","monto":370.0,"detalle":"REST CAFFE LUCCA VALLE DE BRAVO - Gold"},{"id":1900000041000,"fecha":"2026-03-18","tipo":"Gasto","categoria":"RESTAURANTE","monto":100.0,"detalle":"PAMBA FOODS PAMBA FOODS MIGUEL HIDALGO - Gold"},{"id":1900000042000,"fecha":"2026-03-20","tipo":"Gasto","categoria":"RESTAURANTE","monto":275.0,"detalle":"REST LATTE AND LATTA HUIXQUILUCAN - Gold"},{"id":1900000043000,"fecha":"2026-03-25","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":5912.0,"detalle":"SEPHORA SANTA FE IC CIUDAD DE MEXIC - Gold"},{"id":2200000000000,"fecha":"2026-06-01","tipo":"Gasto","categoria":"SEGURO SALUD (Bupa MSI)","monto":6783.58,"detalle":"Bupa 1/4 - MSI 1/3"},{"id":2200000001000,"fecha":"2026-07-01","tipo":"Gasto","categoria":"SEGURO SALUD (Bupa MSI)","monto":6783.58,"detalle":"Bupa 1/4 - MSI 2/3"},{"id":2200000002000,"fecha":"2026-08-01","tipo":"Gasto","categoria":"SEGURO SALUD (Bupa MSI)","monto":6783.59,"detalle":"Bupa 1/4 - MSI 3/3"},{"id":2200000003000,"fecha":"2026-08-01","tipo":"Gasto","categoria":"SEGURO SALUD (Bupa MSI)","monto":6421.08,"detalle":"Bupa 2/4 - MSI 1/3"},{"id":2200000004000,"fecha":"2026-09-01","tipo":"Gasto","categoria":"SEGURO SALUD (Bupa MSI)","monto":6421.08,"detalle":"Bupa 2/4 - MSI 2/3"},{"id":2200000005000,"fecha":"2026-10-01","tipo":"Gasto","categoria":"SEGURO SALUD (Bupa MSI)","monto":6421.09,"detalle":"Bupa 2/4 - MSI 3/3"},{"id":2200000006000,"fecha":"2026-11-01","tipo":"Gasto","categoria":"SEGURO SALUD (Bupa MSI)","monto":6421.08,"detalle":"Bupa 3/4 - MSI 1/3"},{"id":2200000007000,"fecha":"2026-12-01","tipo":"Gasto","categoria":"SEGURO SALUD (Bupa MSI)","monto":6421.08,"detalle":"Bupa 3/4 - MSI 2/3"},{"id":2200000008000,"fecha":"2027-01-01","tipo":"Gasto","categoria":"SEGURO SALUD (Bupa MSI)","monto":6421.09,"detalle":"Bupa 3/4 - MSI 3/3"},{"id":2200000009000,"fecha":"2027-02-01","tipo":"Gasto","categoria":"SEGURO SALUD (Bupa MSI)","monto":6421.08,"detalle":"Bupa 4/4 - MSI 1/3"},{"id":2200000010000,"fecha":"2027-03-01","tipo":"Gasto","categoria":"SEGURO SALUD (Bupa MSI)","monto":6421.08,"detalle":"Bupa 4/4 - MSI 2/3"},{"id":2200000011000,"fecha":"2027-04-01","tipo":"Gasto","categoria":"SEGURO SALUD (Bupa MSI)","monto":6421.09,"detalle":"Bupa 4/4 - MSI 3/3"},{"id":2300000000000,"fecha":"2026-05-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":736.67,"detalle":"Shopbop.com Gold MSI 1/3"},{"id":2300000001000,"fecha":"2026-06-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":736.67,"detalle":"Shopbop.com Gold MSI 2/3"},{"id":2300000002000,"fecha":"2026-07-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":736.68,"detalle":"Shopbop.com Gold MSI 3/3"},{"id":2400000000000,"fecha":"2026-04-18","tipo":"Gasto","categoria":"INVERSIONES","monto":20000.0,"detalle":"Instalación cargador eléctrico - Efectivo"},{"id":2400000001000,"fecha":"2026-04-18","tipo":"Gasto","categoria":"INVERSIONES","monto":20000.0,"detalle":"Instalación cargador eléctrico - Transferencia"},{"id":2400000002000,"fecha":"2026-04-21","tipo":"Gasto","categoria":"INVERSIONES","monto":3600.0,"detalle":"Extensión cargador - Amazon Amex"},{"id":2500000000000,"fecha":"2026-04-21","tipo":"Gasto","categoria":"GYM / DEPORTE","monto":4800.0,"detalle":"Maestro Gym (6 clases × 2 personas) - Transferencia Banamex"},{"id":2500000001000,"fecha":"2026-05-01","tipo":"Gasto","categoria":"GYM / DEPORTE","monto":6400.0,"detalle":"Maestro Gym (8 clases × 2 personas) - Transferencia"},{"id":2500000002000,"fecha":"2026-06-01","tipo":"Gasto","categoria":"GYM / DEPORTE","monto":6400.0,"detalle":"Maestro Gym (8 clases × 2 personas) - Transferencia"},{"id":2500000003000,"fecha":"2026-07-01","tipo":"Gasto","categoria":"GYM / DEPORTE","monto":6400.0,"detalle":"Maestro Gym (8 clases × 2 personas) - Transferencia"},{"id":2500000004000,"fecha":"2026-08-01","tipo":"Gasto","categoria":"GYM / DEPORTE","monto":6400.0,"detalle":"Maestro Gym (8 clases × 2 personas) - Transferencia"},{"id":2500000005000,"fecha":"2026-09-01","tipo":"Gasto","categoria":"GYM / DEPORTE","monto":6400.0,"detalle":"Maestro Gym (8 clases × 2 personas) - Transferencia"},{"id":2500000006000,"fecha":"2026-10-01","tipo":"Gasto","categoria":"GYM / DEPORTE","monto":6400.0,"detalle":"Maestro Gym (8 clases × 2 personas) - Transferencia"},{"id":2500000007000,"fecha":"2026-11-01","tipo":"Gasto","categoria":"GYM / DEPORTE","monto":6400.0,"detalle":"Maestro Gym (8 clases × 2 personas) - Transferencia"},{"id":2500000008000,"fecha":"2026-12-01","tipo":"Gasto","categoria":"GYM / DEPORTE","monto":6400.0,"detalle":"Maestro Gym (8 clases × 2 personas) - Transferencia"},{"id":2700000000000,"fecha":"2026-04-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":1399.77,"detalle":"Salomon Gold - MSI 1/3"},{"id":2700000001000,"fecha":"2026-05-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":1399.77,"detalle":"Salomon Gold - MSI 2/3"},{"id":2700000002000,"fecha":"2026-06-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":1399.7600000000002,"detalle":"Salomon Gold - MSI 3/3"},{"id":2600000000000,"fecha":"2026-04-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":689.17,"detalle":"Ulta Beauty Gold - MSI 1/6"},{"id":2600000001000,"fecha":"2026-05-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":689.17,"detalle":"Ulta Beauty Gold - MSI 2/6"},{"id":2600000002000,"fecha":"2026-06-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":689.17,"detalle":"Ulta Beauty Gold - MSI 3/6"},{"id":2600000003000,"fecha":"2026-07-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":689.17,"detalle":"Ulta Beauty Gold - MSI 4/6"},{"id":2600000004000,"fecha":"2026-08-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":689.17,"detalle":"Ulta Beauty Gold - MSI 5/6"},{"id":2600000005000,"fecha":"2026-09-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":689.1600000000003,"detalle":"Ulta Beauty Gold - MSI 6/6"},{"id":2800000000000,"fecha":"2025-11-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":816.5,"detalle":"Daniel Wellington - MSI 1/6"},{"id":2800000001000,"fecha":"2025-12-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":816.5,"detalle":"Daniel Wellington - MSI 2/6"},{"id":2800000002000,"fecha":"2026-01-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":816.5,"detalle":"Daniel Wellington - MSI 3/6"},{"id":2800000003000,"fecha":"2026-02-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":816.5,"detalle":"Daniel Wellington - MSI 4/6"},{"id":2800000004000,"fecha":"2026-03-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":816.5,"detalle":"Daniel Wellington - MSI 5/6"},{"id":2800000005000,"fecha":"2026-04-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":816.5,"detalle":"Daniel Wellington - MSI 6/6"},{"id":2900000000000,"fecha":"2026-04-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":730.0,"detalle":"Ben and Frank Gold - MSI 1/3"},{"id":2900000001000,"fecha":"2026-05-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":730.0,"detalle":"Ben and Frank Gold - MSI 2/3"},{"id":2900000002000,"fecha":"2026-06-01","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":730.0,"detalle":"Ben and Frank Gold - MSI 3/3"},{"id":3000000000000,"fecha":"2025-02-01","tipo":"Gasto","categoria":"GAS","monto":1011.0,"detalle":"Gas LP bimestral"},{"id":3000000001000,"fecha":"2025-03-01","tipo":"Gasto","categoria":"GAS","monto":635.0,"detalle":"Gas LP bimestral"},{"id":3000000002000,"fecha":"2025-04-01","tipo":"Gasto","categoria":"GAS","monto":672.0,"detalle":"Gas LP bimestral"},{"id":3000000003000,"fecha":"2025-05-01","tipo":"Gasto","categoria":"GAS","monto":742.0,"detalle":"Gas LP bimestral"},{"id":3000000004000,"fecha":"2025-06-01","tipo":"Gasto","categoria":"GAS","monto":774.0,"detalle":"Gas LP bimestral"},{"id":3000000005000,"fecha":"2025-07-01","tipo":"Gasto","categoria":"GAS","monto":769.0,"detalle":"Gas LP bimestral"},{"id":3000000006000,"fecha":"2025-08-01","tipo":"Gasto","categoria":"GAS","monto":929.0,"detalle":"Gas LP bimestral"},{"id":3000000007000,"fecha":"2025-09-01","tipo":"Gasto","categoria":"GAS","monto":790.0,"detalle":"Gas LP bimestral"},{"id":3000000008000,"fecha":"2025-10-01","tipo":"Gasto","categoria":"GAS","monto":1063.0,"detalle":"Gas LP bimestral"},{"id":3000000009000,"fecha":"2026-01-01","tipo":"Gasto","categoria":"GAS","monto":796.0,"detalle":"Gas LP bimestral"},{"id":3100000000000,"fecha":"2026-05-01","tipo":"Gasto","categoria":"GAS","monto":850.0,"detalle":"Gas LP bimestral (proyección)"},{"id":3100000001000,"fecha":"2026-07-01","tipo":"Gasto","categoria":"GAS","monto":850.0,"detalle":"Gas LP bimestral (proyección)"},{"id":3100000002000,"fecha":"2026-09-01","tipo":"Gasto","categoria":"GAS","monto":850.0,"detalle":"Gas LP bimestral (proyección)"},{"id":3100000003000,"fecha":"2026-11-01","tipo":"Gasto","categoria":"GAS","monto":850.0,"detalle":"Gas LP bimestral (proyección)"},{"id":3200000000000,"fecha":"9999-12-31","tipo":"Deuda Pendiente","categoria":"MAASER (AISH)","monto":8000.0,"detalle":"Deuda Maaser AISH - Pendiente de pago"},{"id":3300000000000,"fecha":"2026-03-26","tipo":"Gasto","categoria":"DISPOSICION EFECTIVO","monto":707.0,"detalle":"Disposición efectivo Banamex - BancaNet"},{"id":3300000001000,"fecha":"2026-03-26","tipo":"Gasto","categoria":"DISPOSICION EFECTIVO","monto":800.0,"detalle":"Disposición efectivo Banamex - BancaNet"},{"id":3300000002000,"fecha":"2026-03-27","tipo":"Gasto","categoria":"SALUD","monto":187.5,"detalle":"Farmatodo Miramontes - Banamex"},{"id":3300000003000,"fecha":"2026-03-29","tipo":"Gasto","categoria":"ROPA Y ACCESORIOS","monto":3001.0,"detalle":"Massimo Dutti Antara - Banamex"},{"id":3300000004000,"fecha":"2026-03-28","tipo":"Gasto","categoria":"SUSCRIPCIONES","monto":129.0,"detalle":"Amazon Audible - Banamex"},{"id":3300000005000,"fecha":"2026-04-07","tipo":"Gasto","categoria":"RESTAURANTE","monto":180.0,"detalle":"Sol en Agua - Banamex"},{"id":3300000006000,"fecha":"2026-04-12","tipo":"Gasto","categoria":"SUSCRIPCIONES","monto":3477.96,"detalle":"Claude.AI Pro USD $200 - Banamex"},{"id":3300000007000,"fecha":"2026-04-07","tipo":"Gasto","categoria":"COMISIONES","monto":555.0,"detalle":"Comisión penalización pago tardío - Banamex"},{"id":3300000008000,"fecha":"2026-04-07","tipo":"Gasto","categoria":"COMISIONES","monto":555.0,"detalle":"Comisión gastos de cobranza - Banamex"},{"id":3400000000000,"fecha":"2026-01-15","tipo":"Gasto","categoria":"SUSCRIPCIONES","monto":999.0,"detalle":"Licencia anual AI (resume juntas) - Tarjeta"},{"id":9900000001000,"fecha":"2026-04-26","tipo":"Gasto","categoria":"TECNOLOGÍA","monto":36799.0,"detalle":"Samsung Galaxy Z Fold 7 Negro 512GB - Contado Amex Platinum"},{"id":9900000002000,"fecha":"2026-05-01","tipo":"MSI","categoria":"TECNOLOGÍA","monto":12266.33,"detalle":"Samsung Galaxy Z Fold 7 - MSI 1/3"},{"id":9900000003000,"fecha":"2026-06-01","tipo":"MSI","categoria":"TECNOLOGÍA","monto":12266.33,"detalle":"Samsung Galaxy Z Fold 7 - MSI 2/3"},{"id":9900000004000,"fecha":"2026-07-01","tipo":"MSI","categoria":"TECNOLOGÍA","monto":12266.34,"detalle":"Samsung Galaxy Z Fold 7 - MSI 3/3 → último"},{"id":9800000000000,"fecha":"2026-01-01","tipo":"Gasto","categoria":"CASA / HOGAR","monto":4000.0,"detalle":"Muchacha entrada por salida (Lun y Jue) - estimado mensual"},{"id":9800000000001,"fecha":"2026-02-01","tipo":"Gasto","categoria":"CASA / HOGAR","monto":4000.0,"detalle":"Muchacha entrada por salida (Lun y Jue) - estimado mensual"},{"id":9800000000002,"fecha":"2026-03-01","tipo":"Gasto","categoria":"CASA / HOGAR","monto":4000.0,"detalle":"Muchacha entrada por salida (Lun y Jue) - estimado mensual"},{"id":9800000000003,"fecha":"2026-04-01","tipo":"Gasto","categoria":"CASA / HOGAR","monto":4000.0,"detalle":"Muchacha entrada por salida (Lun y Jue) - estimado mensual"},{"id":9700000000000,"fecha":"2025-06-09","tipo":"Gasto","categoria":"CASA / HOGAR","monto":2000.0,"detalle":"Muchacha entrada por salida (Lun y Jue) - medio mes"},{"id":9700000001000,"fecha":"2025-07-01","tipo":"Gasto","categoria":"CASA / HOGAR","monto":4000.0,"detalle":"Muchacha entrada por salida (Lun y Jue) - estimado mensual"},{"id":9700000002000,"fecha":"2025-08-01","tipo":"Gasto","categoria":"CASA / HOGAR","monto":4000.0,"detalle":"Muchacha entrada por salida (Lun y Jue) - estimado mensual"},{"id":9700000003000,"fecha":"2025-09-01","tipo":"Gasto","categoria":"CASA / HOGAR","monto":4000.0,"detalle":"Muchacha entrada por salida (Lun y Jue) - estimado mensual"},{"id":9700000004000,"fecha":"2025-10-01","tipo":"Gasto","categoria":"CASA / HOGAR","monto":4000.0,"detalle":"Muchacha entrada por salida (Lun y Jue) - estimado mensual"},{"id":9700000005000,"fecha":"2025-11-01","tipo":"Gasto","categoria":"CASA / HOGAR","monto":4000.0,"detalle":"Muchacha entrada por salida (Lun y Jue) - estimado mensual"},{"id":9700000006000,"fecha":"2025-12-01","tipo":"Gasto","categoria":"CASA / HOGAR","monto":4000.0,"detalle":"Muchacha entrada por salida (Lun y Jue) - estimado mensual"},{"id":9600000001000,"fecha":"2026-04-27","tipo":"Pago","categoria":"PAGO TARJETA","monto":14710.0,"detalle":"Pago Banamex Explora *completo*"},{"id":9500000000000,"fecha":"2025-09-01","tipo":"Gasto","categoria":"SUSCRIPCIONES","monto":3600.0,"detalle":"Pop TV - Transferencia"},{"id":9500000000001,"fecha":"2025-10-01","tipo":"Gasto","categoria":"SUSCRIPCIONES","monto":3600.0,"detalle":"Pop TV - Transferencia"},{"id":9500000000002,"fecha":"2025-11-01","tipo":"Gasto","categoria":"SUSCRIPCIONES","monto":3600.0,"detalle":"Pop TV - Transferencia"},{"id":9500000000003,"fecha":"2025-12-01","tipo":"Gasto","categoria":"SUSCRIPCIONES","monto":3600.0,"detalle":"Pop TV - Transferencia"},{"id":9500000010000,"fecha":"2026-01-01","tipo":"Gasto","categoria":"SUSCRIPCIONES","monto":3600.0,"detalle":"Pop TV - Transferencia"},{"id":9500000010001,"fecha":"2026-02-01","tipo":"Gasto","categoria":"SUSCRIPCIONES","monto":3600.0,"detalle":"Pop TV - Transferencia"},{"id":9500000010002,"fecha":"2026-03-01","tipo":"Gasto","categoria":"SUSCRIPCIONES","monto":3600.0,"detalle":"Pop TV - Transferencia"},{"id":9500000010003,"fecha":"2026-04-01","tipo":"Gasto","categoria":"SUSCRIPCIONES","monto":3600.0,"detalle":"Pop TV - Transferencia"},{"id":9500000020000,"fecha":"2026-04-27","tipo":"Gasto","categoria":"SUSCRIPCIONES","monto":500.0,"detalle":"Pop TV - Suscripción adicional - Transferencia"},{"id":9600000002000,"fecha":"2025-09-01","tipo":"Gasto","categoria":"SUSCRIPCIONES","monto":3600.0,"detalle":"Pop TV - Suscripción anual - Transferencia"},{"id":9600000003000,"fecha":"2026-04-27","tipo":"Gasto","categoria":"SUSCRIPCIONES","monto":500.0,"detalle":"Pop TV adicional - Suscripción anual - Transferencia"},{"id":9600000004000,"fecha":"2026-04-27","tipo":"Gasto","categoria":"SERVICIOS","monto":809.63,"detalle":"Gas LP - Periodo 24 Mar al 23 Abr 2026"}];save();}
+
+
+function save(){try{localStorage.setItem("gp_jose_v3",JSON.stringify(gastos));}catch{}}
+function fmt(n){return"$"+Math.round(Math.abs(n)).toLocaleString("es-MX")}
+function tipoColor(t){return t==="Ingreso"?"#1D9E75":t==="Ahorro"?"#7F77DD":t==="Deuda-Pago"?"#E24B4A":"#2E75B6"}
+function notif(m){const n=document.getElementById("notif");n.textContent=m;n.classList.add("show");setTimeout(()=>n.classList.remove("show"),2000)}
+function gastosMes(){return gastos.filter(g=>{const d=new Date(g.fecha+"T00:00:00");return d.getMonth()===mesActual && d.getFullYear()===anioActual})}
+
+function getAnios(){
+  const s=new Set(gastos.map(g=>parseInt(g.fecha.slice(0,4))));
+  return [...s].sort();
+}
+
+function renderAnios(){
+  const c=document.getElementById("anios");c.innerHTML="";
+  getAnios().forEach(a=>{
+    const b=document.createElement("button");
+    b.className="anio-btn"+(a===anioActual?" active":"");
+    b.textContent=a;
+    b.onclick=()=>{anioActual=a;document.getElementById("anio").textContent=a;renderAnios();renderMeses();renderTodo()};
+    c.appendChild(b);
+  });
+}
+
+function renderMeses(){
+  const c=document.getElementById("meses");c.innerHTML="";
+  MESES.forEach((m,i)=>{
+    const tieneData=gastos.some(g=>{const d=new Date(g.fecha+"T00:00:00");return d.getMonth()===i && d.getFullYear()===anioActual});
+    const b=document.createElement("button");
+    b.className="mes-btn"+(i===mesActual?" active":"")+(tieneData?"":" opacity: 0.4");
+    b.style.opacity=tieneData?"1":"0.4";
+    b.textContent=m.slice(0,3);
+    b.onclick=()=>{mesActual=i;renderMeses();renderTodo()};
+    c.appendChild(b);
+  });
+}
+
+function renderMetricas(){
+  const gm=gastosMes();
+  const ing=gm.filter(g=>g.tipo==="Ingreso").reduce((s,g)=>s+g.monto,0);
+  const gas=gm.filter(g=>g.tipo==="Gasto").reduce((s,g)=>s+g.monto,0);
+  const aho=gm.filter(g=>g.tipo==="Ahorro").reduce((s,g)=>s+g.monto,0);
+  const sal=ing-gas-aho;
+  document.getElementById("m-ing").textContent=fmt(ing);
+  document.getElementById("m-gas").textContent=fmt(gas);
+  document.getElementById("m-aho").textContent=fmt(aho);
+  document.getElementById("m-sal").textContent=(sal>=0?"+":"-")+fmt(sal);
+  document.getElementById("m-sal-card").className="metrica "+(sal>=0?"sal-pos":"sal-neg");
+  document.getElementById("footer-count").textContent=gastos.length+" movimiento"+(gastos.length!==1?"s":"")+" en total";
+}
+
+function renderMovimientos(){
+  const c=document.getElementById("lista-movs");
+  const gm=[...gastosMes()].reverse();
+  if(!gm.length){c.innerHTML='<div class="empty">Sin movimientos en '+MESES[mesActual]+'.</div>';return}
+  c.innerHTML="";
+  gm.forEach(g=>{
+    const d=document.createElement("div");d.className="mov-item";
+    d.innerHTML=`<div class="dot" style="background:${tipoColor(g.tipo)}"></div>
+    <div class="mov-info"><div class="mov-cat">${g.categoria}</div>
+    <div class="mov-fecha">${g.fecha}${g.detalle?" · "+g.detalle:""}</div></div>
+    <div class="mov-monto" style="color:${tipoColor(g.tipo)}">${g.tipo==="Ingreso"?"+":"-"}${fmt(g.monto)}</div>
+    <div class="mov-acciones">
+      <button class="btn-sm" onclick="editar(${g.id})" style="color:#555">✎</button>
+      <button class="btn-sm" onclick="eliminar(${g.id})" style="color:#A32D2D">×</button>
+    </div>`;
+    c.appendChild(d);
+  });
+}
+
+function renderResumen(){
+  const gm=gastosMes();
+  document.getElementById("res-titulo").textContent="Top gastos — "+MESES[mesActual];
+  const ing=gm.filter(g=>g.tipo==="Ingreso").reduce((s,g)=>s+g.monto,0);
+  const gas=gm.filter(g=>g.tipo==="Gasto").reduce((s,g)=>s+g.monto,0);
+  const aho=gm.filter(g=>g.tipo==="Ahorro").reduce((s,g)=>s+g.monto,0);
+  const sal=ing-gas-aho;
+  document.getElementById("r-ing").textContent=fmt(ing);
+  document.getElementById("r-gas").textContent=fmt(gas);
+  document.getElementById("r-aho").textContent=fmt(aho);
+  const rs=document.getElementById("r-sal");
+  rs.textContent=(sal>=0?"+":"-")+fmt(sal);
+  rs.style.color=sal>=0?"#0F6E56":"#A32D2D";
+  const porCat={};
+  gm.filter(g=>g.tipo==="Gasto").forEach(g=>{porCat[g.categoria]=(porCat[g.categoria]||0)+g.monto});
+  const top=Object.entries(porCat).sort((a,b)=>b[1]-a[1]).slice(0,7);
+  const maxV=top.length?top[0][1]:1;
+  const barras=document.getElementById("barras");
+  if(!top.length){barras.innerHTML='<div class="empty">Sin gastos en '+MESES[mesActual]+'</div>';return}
+  barras.innerHTML="";
+  top.forEach(([cat,monto])=>{
+    const d=document.createElement("div");d.className="bar-row";
+    d.innerHTML=`<div class="bar-label"><span>${cat}</span><span style="color:#A32D2D;font-weight:600">${fmt(monto)}</span></div>
+    <div class="bar-track"><div class="bar-fill" style="width:${Math.round((monto/maxV)*100)}%"></div></div>`;
+    barras.appendChild(d);
+  });
+}
+
+const CAT_COLORS={
+  "INGRESOS":"#0F6E56","CASA":"#2E75B6","COMUNICACIONES":"#6366f1","SEGUROS":"#0891b2",
+  "TRANSPORTE":"#f59e0b","CRÉDITOS Y PAGOS":"#dc2626","FISCAL":"#7c3aed",
+  "MAASER / TZEDAKÁ":"#059669","ANUALIDADES Y SUSCRIPCIONES":"#db2777",
+  "SALUD":"#16a34a","ALIMENTACIÓN Y ENTRETENIMIENTO":"#ea580c",
+  "COMPRAS":"#9333ea","AHORRO E INVERSIÓN":"#0369a1","VIAJES":"#d97706","OTROS":"#6b7280"
+};
+function renderCategorias(){
+  const gm=gastosMes();
+  const soloGastos=gm.filter(g=>g.tipo==="Gasto");
+  const total=soloGastos.reduce((s,g)=>s+g.monto,0);
+  const porCat={};
+  soloGastos.forEach(g=>{porCat[g.categoria]=(porCat[g.categoria]||0)+g.monto;});
+  const cont=document.getElementById("lista-cats");
+  if(!Object.keys(porCat).length){cont.innerHTML='<div class="empty">Sin gastos en '+MESES[mesActual]+' '+anioActual+'</div>';return;}
+  let html='';
+  GRUPOS.forEach(gr=>{
+    const catsConGasto=gr.cats.filter(c=>porCat[c]);
+    if(!catsConGasto.length)return;
+    const color=CAT_COLORS[gr.g]||"#6b7280";
+    html+=`<div class="cat-grupo">${gr.g}</div>`;
+    catsConGasto.sort((a,b)=>porCat[b]-porCat[a]).forEach(cat=>{
+      const m=porCat[cat];
+      const pct=total>0?Math.round((m/total)*100):0;
+      html+=`<div class="cat-item">
+        <div class="cat-dot" style="background:${color}"></div>
+        <div class="cat-info">
+          <div class="cat-nombre">${cat}</div>
+          <div class="cat-bar-track"><div class="cat-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+        </div>
+        <div class="cat-right">
+          <div class="cat-monto">${fmt(m)}</div>
+          <div class="cat-pct">${pct}%</div>
+        </div>
+      </div>`;
+    });
+  });
+  html+=`<div class="cat-total-row"><span>Total gastos ${MESES[mesActual]}</span><span style="color:#A32D2D">${fmt(total)}</span></div>`;
+  cont.innerHTML=html;
+}
+
+function renderProgreso(){
+  const hoy=new Date();
+  const esHoy=mesActual===hoy.getMonth()&&anioActual===hoy.getFullYear();
+  const diasEnMes=new Date(anioActual,mesActual+1,0).getDate();
+  const diaHoy=hoy.getDate();
+  const box=document.getElementById("mes-progress-box");
+  if(!esHoy){
+    // Mes pasado o futuro: barra completa o vacía
+    const esPasado=anioActual<hoy.getFullYear()||(anioActual===hoy.getFullYear()&&mesActual<hoy.getMonth());
+    box.style.display=esPasado?"none":"none"; // ocultar en meses que no son el actual
+    return;
+  }
+  box.style.display="block";
+  const pct=Math.round((diaHoy/diasEnMes)*100);
+  document.getElementById("prog-label").textContent=`${MESES[mesActual]} ${anioActual} — día ${diaHoy} de ${diasEnMes}`;
+  document.getElementById("prog-dias").textContent=`${pct}% del mes transcurrido`;
+  document.getElementById("prog-fill").style.width=pct+"%";
+  // Color: verde si hay presupuesto sobrante, rojo si los gastos van muy altos
+  const gas=parseFloat(document.getElementById("m-gas").textContent.replace(/[^0-9.]/g,""))||0;
+  const ing=parseFloat(document.getElementById("m-ing").textContent.replace(/[^0-9.]/g,""))||0;
+  const gastoEsperado=ing>0?(pct/100)*ing:0;
+  const color=ing>0&&gas>gastoEsperado?"#dc2626":"#2E75B6";
+  document.getElementById("prog-fill").style.background=`linear-gradient(90deg,${color},${color}aa)`;
+}
+
+function renderTodo(){renderMetricas();renderMovimientos();renderResumen();renderCategorias();renderProgreso()}
+
+function guardar(){
+  const fecha=document.getElementById("f-fecha").value;
+  const tipo=document.getElementById("f-tipo").value;
+  const categoria=document.getElementById("f-cat").value;
+  const monto=parseFloat(document.getElementById("f-monto").value);
+  const detalle=document.getElementById("f-detalle").value.trim();
+  if(!fecha||isNaN(monto)||monto<=0){alert("Llena fecha y monto.");return}
+  if(editId!==null){
+    gastos=gastos.map(g=>g.id===editId?{id:editId,fecha,tipo,categoria,monto,detalle}:g);
+    cancelarEdicion();notif("Actualizado");
+  }else{
+    gastos.push({id:Date.now(),fecha,tipo,categoria,monto,detalle});
+    document.getElementById("f-monto").value="";
+    document.getElementById("f-detalle").value="";
+    document.getElementById("f-fecha").value=new Date().toISOString().split("T")[0];
+    notif("Guardado");
+  }
+  save();renderTodo();
+}
+
+function eliminar(id){
+  if(!confirm("¿Eliminar este movimiento?"))return;
+  gastos=gastos.filter(g=>g.id!==id);save();renderTodo();notif("Eliminado");
+}
+
+function editar(id){
+  const g=gastos.find(x=>x.id===id);if(!g)return;
+  document.getElementById("f-fecha").value=g.fecha;
+  document.getElementById("f-tipo").value=g.tipo;
+  document.getElementById("f-cat").value=g.categoria;
+  document.getElementById("f-monto").value=g.monto;
+  document.getElementById("f-detalle").value=g.detalle||"";
+  editId=id;
+  document.getElementById("btn-guardar").textContent="Guardar cambios";
+  document.getElementById("btn-cancel").style.display="block";
+  document.getElementById("form-title").textContent="Editar movimiento";
+  setTab("registrar");
+}
+
+function cancelarEdicion(){
+  editId=null;
+  document.getElementById("btn-guardar").textContent="+ Agregar";
+  document.getElementById("btn-cancel").style.display="none";
+  document.getElementById("form-title").textContent="Nuevo movimiento";
+  document.getElementById("f-monto").value="";
+  document.getElementById("f-detalle").value="";
+}
+
+function setTab(t){
+  ["registrar","movimientos","categorias","resumen"].forEach((id,i)=>{
+    document.getElementById("tab-"+id).style.display=id===t?"block":"none";
+    document.querySelectorAll(".tab")[i].className="tab"+(id===t?" active":"");
+  });
+}
+
+document.getElementById("f-monto").addEventListener("keydown",e=>{if(e.key==="Enter")guardar()});
+document.getElementById("f-detalle").addEventListener("keydown",e=>{if(e.key==="Enter")guardar()});
+
+renderAnios();renderMeses();renderTodo();
+</script>
+</body>
+</html>
