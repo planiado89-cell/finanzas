@@ -164,6 +164,8 @@ const GRUPOS=[
   {g:"VIAJES",cats:["VUELOS","HOTEL","RENTA DE COCHE","VIÁTICOS VIAJE","VIAJES VARIOS"]},{g:"OTROS",cats:["DENTISTA","CURSOS / EDUCACIÓN","REGALOS","GASTOS VARIOS","OTROS"]}
 ];
 
+// Reset por URL: gastos.html?reset=1
+if(new URLSearchParams(location.search).get('reset')==='1'){localStorage.clear();location.href=location.pathname;}
 let gastos=JSON.parse(localStorage.getItem("gp_jose_v3")||"[]");
 // Migración: Estado de Cuenta Amex Gold · corte 13 May 2026
 (function(){
