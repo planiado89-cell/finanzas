@@ -166,14 +166,6 @@ const GRUPOS=[
 
 // Reset por URL: gastos.html?reset=1
 if(new URLSearchParams(location.search).get('reset')==='1'){localStorage.clear();location.href=location.pathname;}
-// Auto-reset de migraciones cuando hay nueva versión publicada
-(function(){
-  const DATA_VER="v20260616_03";
-  if(localStorage.getItem("gp_jose_data_ver")!==DATA_VER){
-    Object.keys(localStorage).filter(k=>k.startsWith("gp_jose_migr_")).forEach(k=>localStorage.removeItem(k));
-    localStorage.setItem("gp_jose_data_ver",DATA_VER);
-  }
-})();
 let gastos=JSON.parse(localStorage.getItem("gp_jose_v4")||"[]");
 // Migración: Estado de Cuenta Amex Gold · corte 13 May 2026
 (function(){
@@ -535,19 +527,14 @@ let gastos=JSON.parse(localStorage.getItem("gp_jose_v4")||"[]");
 })();
 // Ingreso mayo 2026 — $95,000 + IVA 16%
 (function(){
-  const KEY="gp_jose_migr_ingreso_may2026_v2";
-  if(localStorage.getItem(KEY))return;
   const id=3200000000000;
   if(!gastos.some(g=>g.id===id)){
     gastos.push({id,fecha:"2026-05-01",tipo:"Ingreso",categoria:"EMPLEO / INGRESO",detalle:"Sueldo mayo 2026 · según factura",monto:94705.39});
   }
   try{localStorage.setItem("gp_jose_v4",JSON.stringify(gastos));}catch{}
-  localStorage.setItem(KEY,"1");
 })();
 // Dr. Chaya — consulta jun-2026
 (function(){
-  const KEY="gp_jose_migr_drchaya_jun2026_v2";
-  if(localStorage.getItem(KEY))return;
   const BASE_ID=3900000000000;
   const entradas=[
     {i:0,fecha:"2026-06-15",tipo:"Gasto",categoria:"SALUD",detalle:"Dr. Chaya · Ultrasonido · tarjeta",monto:1240.00},
@@ -555,37 +542,27 @@ let gastos=JSON.parse(localStorage.getItem("gp_jose_v4")||"[]");
   ];
   entradas.forEach(e=>{const id=BASE_ID+e.i*1000;if(!gastos.some(g=>g.id===id)){gastos.push({id,...e});}});
   try{localStorage.setItem("gp_jose_v4",JSON.stringify(gastos));}catch{}
-  localStorage.setItem(KEY,"1");
 })();
 // Gym — jun-2026
 (function(){
-  const KEY="gp_jose_migr_gym_jun2026_v2";
-  if(localStorage.getItem(KEY))return;
   const id=4000000000000;
   const idx=gastos.findIndex(g=>g.id===id);
   if(idx>=0){gastos.splice(idx,1);}
   gastos.push({id,fecha:"2026-06-15",tipo:"Gasto",categoria:"SALUD",detalle:"Gym · 9 clases · $500/clase · 1 persona · transferencia",monto:4500.00});
   try{localStorage.setItem("gp_jose_v4",JSON.stringify(gastos));}catch{}
-  localStorage.setItem(KEY,"1");
 })();
-// Pago Exalta Hero — jun-2026
+// GA Solucion Leasing — coche jun-2026
 (function(){
-  const KEY="gp_jose_migr_coche_jun2026_v1";
-  if(localStorage.getItem(KEY))return;
   const id=4100000000000;
   if(!gastos.some(g=>g.id===id)){
     gastos.push({id,fecha:"2026-06-16",tipo:"Gasto",categoria:"CRÉDITOS Y PAGOS",detalle:"GA Solucion Leasing · Renta 7/24 + Gastos Op. · Contrato 3758 · CFDI deducible · BBVA *3572",monto:13900.04});
   }
   try{localStorage.setItem("gp_jose_v4",JSON.stringify(gastos));}catch{}
-  localStorage.setItem(KEY,"1");
 })();
-// Estado de Cuenta Amex Gold · corte 13-Jun-2026 (período 14-may al 13-jun-2026)
+// Estado de Cuenta Amex Gold · corte 13-Jun-2026
 (function(){
-  const KEY="gp_jose_migr_gold_jun2026_v1";
-  if(localStorage.getItem(KEY))return;
   const BASE_ID=4200000000000;
   const entradas=[
-    // Jose
     {i:0, fecha:"2026-05-13",tipo:"Gasto",categoria:"SALUD",detalle:"Salón · Amex Gold",monto:390.00},
     {i:1, fecha:"2026-05-14",tipo:"Gasto",categoria:"ROPA / ZARA",detalle:"Salomón · MSI 3/3 (último) · Amex Gold",monto:1399.76},
     {i:2, fecha:"2026-05-14",tipo:"Gasto",categoria:"ROPA / ZARA",detalle:"Ben & Frank · MSI 3/3 (último) · Amex Gold",monto:730.00},
@@ -606,7 +583,6 @@ let gastos=JSON.parse(localStorage.getItem("gp_jose_v4")||"[]");
     {i:17,fecha:"2026-06-04",tipo:"Gasto",categoria:"RESTAURANTE",detalle:"Avivia Bosques · Amex Gold",monto:500.00},
     {i:18,fecha:"2026-06-08",tipo:"Gasto",categoria:"AMAZON / MERCADO LIBRE",detalle:"Mercado Libre · Amex Gold",monto:1070.44},
     {i:19,fecha:"2026-06-11",tipo:"Gasto",categoria:"RESTAURANTE",detalle:"Yakkumi · Amex Gold",monto:311.30},
-    // Raquel
     {i:20,fecha:"2026-05-26",tipo:"Gasto",categoria:"ESPOSA (Raquel)",detalle:"Tienda COM MEX (online) · T.Adic. Raquel · Amex Gold",monto:506.29},
     {i:21,fecha:"2026-05-26",tipo:"Gasto",categoria:"SUPER / DESPENSA",detalle:"Costco Interlomas · T.Adic. Raquel · Amex Gold",monto:2734.33},
     {i:22,fecha:"2026-05-28",tipo:"Gasto",categoria:"ESPOSA (Raquel)",detalle:"Masu K Style (ropa) · T.Adic. Raquel · Amex Gold",monto:4575.00},
@@ -615,34 +591,25 @@ let gastos=JSON.parse(localStorage.getItem("gp_jose_v4")||"[]");
   ];
   entradas.forEach(e=>{const id=BASE_ID+e.i*1000;if(!gastos.some(g=>g.id===id)){gastos.push({id,...e});}});
   try{localStorage.setItem("gp_jose_v4",JSON.stringify(gastos));}catch{}
-  localStorage.setItem(KEY,"1");
 })();
 // Ingreso junio 2026
 (function(){
-  const KEY="gp_jose_migr_ingreso_jun2026_v1";
-  if(localStorage.getItem(KEY))return;
   const id=4300000000000;
   if(!gastos.some(g=>g.id===id)){
     gastos.push({id,fecha:"2026-06-01",tipo:"Ingreso",categoria:"EMPLEO / INGRESO",detalle:"Sueldo junio 2026 · según factura",monto:103562.88});
   }
   try{localStorage.setItem("gp_jose_v4",JSON.stringify(gastos));}catch{}
-  localStorage.setItem(KEY,"1");
 })();
 // Luis casa — semana jun-2026 (2)
 (function(){
-  const KEY="gp_jose_migr_luis_casa_jun2026_v2";
-  if(localStorage.getItem(KEY))return;
   const id=4400000000000;
   if(!gastos.some(g=>g.id===id)){
     gastos.push({id,fecha:"2026-06-09",tipo:"Gasto",categoria:"MTTO CASA (mantenimiento)",detalle:"Luis · mantenimiento casa · gasto semanal",monto:3600.00});
   }
   try{localStorage.setItem("gp_jose_v4",JSON.stringify(gastos));}catch{}
-  localStorage.setItem(KEY,"1");
 })();
 // Maaser junio 2026
 (function(){
-  const KEY="gp_jose_migr_maaser_jun2026_v1";
-  if(localStorage.getItem(KEY))return;
   const BASE_ID=4500000000000;
   const entradas=[
     {i:0,fecha:"2026-06-01",tipo:"Gasto",categoria:"MAASER (10%)",detalle:"Aish Center Mexico · donativo junio 2026",monto:8000.00},
@@ -650,12 +617,9 @@ let gastos=JSON.parse(localStorage.getItem("gp_jose_v4")||"[]");
   ];
   entradas.forEach(e=>{const id=BASE_ID+e.i*1000;if(!gastos.some(g=>g.id===id)){gastos.push({id,...e});}});
   try{localStorage.setItem("gp_jose_v4",JSON.stringify(gastos));}catch{}
-  localStorage.setItem(KEY,"1");
 })();
 // Gastos fijos junio 2026 — CFE, agua
 (function(){
-  const KEY="gp_jose_migr_fijos_jun2026_v2";
-  if(localStorage.getItem(KEY))return;
   const BASE_ID=4600000000000;
   const entradas=[
     {i:0,fecha:"2026-06-16",tipo:"Gasto",categoria:"LUZ",detalle:"CFE · Casa jun-2026",monto:207.00},
@@ -663,18 +627,14 @@ let gastos=JSON.parse(localStorage.getItem("gp_jose_v4")||"[]");
   ];
   entradas.forEach(e=>{const id=BASE_ID+e.i*1000;if(!gastos.some(g=>g.id===id)){gastos.push({id,...e});}});
   try{localStorage.setItem("gp_jose_v4",JSON.stringify(gastos));}catch{}
-  localStorage.setItem(KEY,"1");
 })();
 // Mtto Residencial Avivia — jun-2026
 (function(){
-  const KEY="gp_jose_migr_residencial_jun2026_v1";
-  if(localStorage.getItem(KEY))return;
   const id=4700000000000;
   if(!gastos.some(g=>g.id===id)){
     gastos.push({id,fecha:"2026-06-08",tipo:"Gasto",categoria:"MTTO CASA (mantenimiento)",detalle:"Conjunto Residencial Avivia · mantenimiento jun-2026 · Banamex *578",monto:12694.00});
   }
   try{localStorage.setItem("gp_jose_v4",JSON.stringify(gastos));}catch{}
-  localStorage.setItem(KEY,"1");
 })();
 let mesActual=new Date().getMonth();
 let anioActual=new Date().getFullYear();
