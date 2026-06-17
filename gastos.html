@@ -177,7 +177,7 @@ let gastos=JSON.parse(localStorage.getItem("gp_jose_v4")||"[]");
     {id:4100000000000,fecha:"2026-06-16",tipo:"Gasto",categoria:"CRÉDITOS Y PAGOS",detalle:"GA Solucion Leasing · Renta 7/24 + Gastos Op. · Contrato 3758 · CFDI deducible · BBVA *3572",monto:13900.04},
     {id:4500000000000,fecha:"2026-06-01",tipo:"Gasto",categoria:"MAASER (10%)",detalle:"Aish Center Mexico · donativo junio 2026",monto:8000.00},
     {id:4500001000000,fecha:"2026-06-01",tipo:"Gasto",categoria:"MAASER (10%)",detalle:"Maaser general junio 2026",monto:10000.00},
-    {id:4600000000000,fecha:"2026-06-16",tipo:"Gasto",categoria:"LUZ",detalle:"CFE · Casa jun-2026",monto:207.00},
+    {id:4600000000000,fecha:"2026-06-16",tipo:"Gasto",categoria:"LUZ",detalle:"CFE · Casa jun-2026 · CFDI deducible G03 · Folio MA000237458722",monto:233.23},
     {id:4600001000000,fecha:"2026-06-16",tipo:"Gasto",categoria:"AGUA",detalle:"Agua · jun-2026",monto:180.00},
     {id:4700000000000,fecha:"2026-06-08",tipo:"Gasto",categoria:"MTTO CASA (mantenimiento)",detalle:"Conjunto Residencial Avivia · mantenimiento jun-2026 · Banamex *578",monto:12694.00},
     // === Amex Platinum · Corte 16-Jun-2026 ===
@@ -204,6 +204,7 @@ let gastos=JSON.parse(localStorage.getItem("gp_jose_v4")||"[]");
     {id:4800020000000,fecha:"2026-06-12",tipo:"Gasto",categoria:"GASTOS VARIOS",detalle:"PayPal *Pro000419rn · Amex Platinum",monto:270.50},
     {id:4800021000000,fecha:"2026-05-29",tipo:"Gasto",categoria:"UBER / TAXI",detalle:"Undostres · Uber · mayo-jun · Amex Platinum (consolidado)",monto:130.00},
     {id:4800022000000,fecha:"2026-06-01",tipo:"Gasto",categoria:"SUPER / DESPENSA",detalle:"Superama · Amex Platinum",monto:27.00},
+    {id:4900000000000,fecha:"2026-06-16",tipo:"Gasto",categoria:"AUTO / CARGADOR",detalle:"CFE · Cargador eléctrico coche jun-2026 · CFDI deducible G03 · Folio MA000237458803",monto:1664.36},
   ];
   PATCH.forEach(e=>{
     const idx=gastos.findIndex(g=>g.id===e.id);
