@@ -167,6 +167,50 @@ const GRUPOS=[
 // Reset por URL: gastos.html?reset=1
 if(new URLSearchParams(location.search).get('reset')==='1'){localStorage.clear();location.href=location.pathname;}
 let gastos=JSON.parse(localStorage.getItem("gp_jose_v4")||"[]");
+// PATCH FORZADO — siempre se aplica al cargar, corrige/agrega entradas clave
+(function(){
+  const PATCH=[
+    {id:4300000000000,fecha:"2026-06-01",tipo:"Ingreso",categoria:"EMPLEO / INGRESO",detalle:"Sueldo junio 2026 · según factura",monto:103562.88},
+    {id:3900000000000,fecha:"2026-06-15",tipo:"Gasto",categoria:"SALUD",detalle:"Dr. Chaya · Ultrasonido · tarjeta",monto:1240.00},
+    {id:3900001000000,fecha:"2026-06-15",tipo:"Gasto",categoria:"SALUD",detalle:"Dr. Chaya · Consulta · transferencia",monto:2500.00},
+    {id:4000000000000,fecha:"2026-06-15",tipo:"Gasto",categoria:"SALUD",detalle:"Gym · 9 clases · $500/clase · 1 persona · transferencia",monto:4500.00},
+    {id:4100000000000,fecha:"2026-06-16",tipo:"Gasto",categoria:"CRÉDITOS Y PAGOS",detalle:"GA Solucion Leasing · Renta 7/24 + Gastos Op. · Contrato 3758 · CFDI deducible · BBVA *3572",monto:13900.04},
+    {id:4500000000000,fecha:"2026-06-01",tipo:"Gasto",categoria:"MAASER (10%)",detalle:"Aish Center Mexico · donativo junio 2026",monto:8000.00},
+    {id:4500001000000,fecha:"2026-06-01",tipo:"Gasto",categoria:"MAASER (10%)",detalle:"Maaser general junio 2026",monto:10000.00},
+    {id:4600000000000,fecha:"2026-06-16",tipo:"Gasto",categoria:"LUZ",detalle:"CFE · Casa jun-2026",monto:207.00},
+    {id:4600001000000,fecha:"2026-06-16",tipo:"Gasto",categoria:"AGUA",detalle:"Agua · jun-2026",monto:180.00},
+    {id:4700000000000,fecha:"2026-06-08",tipo:"Gasto",categoria:"MTTO CASA (mantenimiento)",detalle:"Conjunto Residencial Avivia · mantenimiento jun-2026 · Banamex *578",monto:12694.00},
+    // === Amex Platinum · Corte 16-Jun-2026 ===
+    {id:4800000000000,fecha:"2026-05-21",tipo:"Gasto",categoria:"AT&T TELÉFONO",detalle:"AT&T · cargo recurrente · Amex Platinum",monto:579.00},
+    {id:4800001000000,fecha:"2026-05-27",tipo:"Gasto",categoria:"SEGUROS",detalle:"Bupa Mexico · seguro salud anual · MSI 3x · Amex Platinum",monto:51037.75},
+    {id:4800002000000,fecha:"2026-05-20",tipo:"Gasto",categoria:"ROPA Y ACCES",detalle:"Shopbop.com · Raquel · USD 735.78 · Amex Platinum",monto:13067.98},
+    {id:4800003000000,fecha:"2026-05-25",tipo:"Gasto",categoria:"SALUD",detalle:"PayPal *Renexusmedi · suministros médicos · Amex Platinum",monto:4436.00},
+    {id:4800004000000,fecha:"2026-06-02",tipo:"Gasto",categoria:"SALUD",detalle:"OPE Hosp Angeles · consulta Raquel · Amex Platinum",monto:1675.76},
+    {id:4800005000000,fecha:"2026-06-08",tipo:"Gasto",categoria:"ROPA Y ACCES",detalle:"Exalta Hero · ropa Raquel · tarj adicional · Amex Platinum",monto:13051.00},
+    {id:4800006000000,fecha:"2026-06-12",tipo:"Gasto",categoria:"MAASER (10%)",detalle:"Aish Center Mexico · Amex Platinum jun-2026",monto:3600.00},
+    {id:4800007000000,fecha:"2026-06-10",tipo:"Gasto",categoria:"GASTOS VARIOS",detalle:"Sheep.mx - Contador · honorarios · Amex Platinum",monto:604.00},
+    {id:4800008000000,fecha:"2026-05-19",tipo:"Gasto",categoria:"SUPER / DESPENSA",detalle:"Kosherits.mx · super kosher · Amex Platinum",monto:1251.90},
+    {id:4800009000000,fecha:"2026-06-06",tipo:"Gasto",categoria:"SUPER / DESPENSA",detalle:"Kosherits.mx · super kosher · Amex Platinum",monto:1422.65},
+    {id:4800010000000,fecha:"2026-06-13",tipo:"Gasto",categoria:"SUPER / DESPENSA",detalle:"Kosherits.mx · super kosher · Amex Platinum",monto:748.13},
+    {id:4800011000000,fecha:"2026-05-31",tipo:"Gasto",categoria:"RESTAURANTE",detalle:"PayPal *Rappi · pedidos mayo · Amex Platinum (consolidado)",monto:2071.45},
+    {id:4800012000000,fecha:"2026-06-04",tipo:"Gasto",categoria:"RESTAURANTE",detalle:"PayPal *Rappi · pedidos jun 1-16 · Amex Platinum (consolidado)",monto:234.96},
+    {id:4800013000000,fecha:"2026-06-08",tipo:"Gasto",categoria:"RESTAURANTE",detalle:"Cenizanegra · restaurante · Amex Platinum",monto:599.00},
+    {id:4800014000000,fecha:"2026-05-25",tipo:"Gasto",categoria:"GASTOS VARIOS",detalle:"Apple.com/Bill · servicio Apple · Amex Platinum",monto:49.00},
+    {id:4800015000000,fecha:"2026-05-26",tipo:"Gasto",categoria:"GASTOS VARIOS",detalle:"PayPal *Microsoft · servicio · Amex Platinum",monto:339.00},
+    {id:4800016000000,fecha:"2026-06-16",tipo:"Gasto",categoria:"GASTOS VARIOS",detalle:"Google Play/suscripciones USD · Amex Platinum (consolidado)",monto:927.03},
+    {id:4800017000000,fecha:"2026-06-04",tipo:"Gasto",categoria:"SALUD",detalle:"Oura Ring · suscripción · USD 5.99 · Amex Platinum",monto:106.62},
+    {id:4800018000000,fecha:"2026-05-31",tipo:"Gasto",categoria:"AMAZON / ML",detalle:"Amazon · compras mayo 2026 · Amex Platinum (consolidado)",monto:6536.24},
+    {id:4800019000000,fecha:"2026-06-16",tipo:"Gasto",categoria:"AMAZON / ML",detalle:"Amazon · compras jun 1-16 · Amex Platinum (consolidado)",monto:8411.27},
+    {id:4800020000000,fecha:"2026-06-12",tipo:"Gasto",categoria:"GASTOS VARIOS",detalle:"PayPal *Pro000419rn · Amex Platinum",monto:270.50},
+    {id:4800021000000,fecha:"2026-05-29",tipo:"Gasto",categoria:"UBER / TAXI",detalle:"Undostres · Uber · mayo-jun · Amex Platinum (consolidado)",monto:130.00},
+    {id:4800022000000,fecha:"2026-06-01",tipo:"Gasto",categoria:"SUPER / DESPENSA",detalle:"Superama · Amex Platinum",monto:27.00},
+  ];
+  PATCH.forEach(e=>{
+    const idx=gastos.findIndex(g=>g.id===e.id);
+    if(idx>=0)gastos[idx]=e; else gastos.push(e);
+  });
+  try{localStorage.setItem("gp_jose_v4",JSON.stringify(gastos));}catch{}
+})();
 // Migración: Estado de Cuenta Amex Gold · corte 13 May 2026
 (function(){
   const KEY="gp_jose_migr_gold_may2026_v3";
