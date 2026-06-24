@@ -170,7 +170,7 @@ let gastos=JSON.parse(localStorage.getItem("gp_jose_v4")||"[]");
 // PATCH FORZADO — siempre se aplica al cargar, corrige/agrega entradas clave
 (function(){
   const PATCH=[
-    {id:4300000000000,fecha:"2026-06-01",tipo:"Ingreso",categoria:"EMPLEO / INGRESO",detalle:"Sueldo junio 2026 · según factura",monto:103562.88},
+    {id:4300000000000,fecha:"2026-06-22",tipo:"Ingreso",categoria:"EMPLEO / INGRESO",detalle:"Sueldo junio 2026 · según factura",monto:103562.88},
     {id:3900000000000,fecha:"2026-06-15",tipo:"Gasto",categoria:"SALUD",detalle:"Dr. Chaya · Ultrasonido · tarjeta",monto:1240.00},
     {id:3900001000000,fecha:"2026-06-15",tipo:"Gasto",categoria:"SALUD",detalle:"Dr. Chaya · Consulta · transferencia",monto:2500.00},
     {id:4000000000000,fecha:"2026-06-15",tipo:"Gasto",categoria:"SALUD",detalle:"Gym · 9 clases · $500/clase · 1 persona · transferencia",monto:4500.00},
@@ -209,6 +209,8 @@ let gastos=JSON.parse(localStorage.getItem("gp_jose_v4")||"[]");
     {id:5000001000000,fecha:"2026-06-22",tipo:"Gasto",categoria:"GASTOS OBRA",detalle:"Luis · material casa · BBVA",monto:3000.00},
     {id:5000002000000,fecha:"2026-06-22",tipo:"Gasto",categoria:"DECORACIÓN / CASA",detalle:"Yael · decoración · Albo",monto:3500.00},
     {id:5000003000000,fecha:"2026-06-22",tipo:"Gasto",categoria:"SAT / IMPUESTOS",detalle:"SAT · pago RESICO jun-2026",monto:778.00},
+    {id:5000004000000,fecha:"2026-05-21",tipo:"Gasto",categoria:"ROPA Y ACCES",detalle:"Bolsas y Accesorios · Outlet Toluca · Palacio de Hierro",monto:1921.05},
+    {id:5000005000000,fecha:"2026-06-06",tipo:"Gasto",categoria:"GASTOS VARIOS",detalle:"Gastos de Cobranza + IVA · Palacio de Hierro",monto:533.60},
   ];
   PATCH.forEach(e=>{
     const idx=gastos.findIndex(g=>g.id===e.id);
